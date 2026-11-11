@@ -1,0 +1,8 @@
+{
+  "name": "Siloam ICRA - Infection Control Risk Assessment",
+  "description": "Aplikasi Dashboard ICRA (Infection Control Risk Assessment) Komite PPI Siloam Hospitals dengan penilaian matriks risiko, grafik analitik, prioritisasi, dan manajemen data.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

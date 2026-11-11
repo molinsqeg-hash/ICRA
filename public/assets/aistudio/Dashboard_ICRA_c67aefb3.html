@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard ICRA – Infection Control Risk Assessment</title>
+<style>
+:root{
+  --plane:#f4f5f2; --surface:#fcfcfb; --card:#ffffff; --ink:#0b0b0b; --ink2:#52514e; --muted:#8a8984;
+  --grid:#e1e0d9; --axis:#c3c2b7; --line:#e6e5df;
+  --brand:#0f4c5c; --brand2:#13677b; --brand-soft:#e3f0f2; --accent:#2a78d6;
+  --low:#0ca30c; --mod:#fab219; --high:#ec835a; --sig:#d03b3b;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--ink);background:var(--plane);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+aside{background:var(--brand);color:#e9f3f4;padding:18px 14px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:6px}
+.logo{display:flex;gap:10px;align-items:center;padding:4px 6px 16px;border-bottom:1px solid rgba(255,255,255,.14);margin-bottom:10px}
+.logo-mark{width:38px;height:38px;border-radius:9px;background:#fff;color:var(--brand);display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.5px}
+.logo b{display:block;font-size:15px}.logo small{opacity:.75;font-size:11.5px}
+nav button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;color:inherit;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px;opacity:.86}
+nav button:hover{background:rgba(255,255,255,.08);opacity:1}
+nav button.active{background:#fff;color:var(--brand);opacity:1;font-weight:600}
+nav svg{width:18px;height:18px;flex:none}
+.side-foot{margin-top:auto;font-size:11.5px;opacity:.8;padding:10px 6px;border-top:1px solid rgba(255,255,255,.14)}
+.side-foot .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#7be07b;margin-right:6px}
+main{padding:22px 28px 60px;min-width:0}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.page-head h1{font-size:22px;margin:0 0 2px}
+.page-head p{margin:0;color:var(--ink2)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+.card h3{margin:0 0 2px;font-size:15px}
+.card .sub{color:var(--ink2);font-size:12.5px;margin:0 0 10px}
+.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g-kpi{grid-template-columns:repeat(5,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:980px){.g3{grid-template-columns:1fr}}
+.prio-wrap{border-top:4px solid #d03b3b;margin-bottom:14px}
+.prio{border:1px solid #f0c9c9;background:#fff7f7;border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.prio-top{display:flex;justify-content:space-between;align-items:center}
+.prio-badge{background:#d03b3b;color:#fff;font-weight:700;font-size:12px;letter-spacing:.4px;padding:3px 10px;border-radius:99px}
+.prio-score{font-size:34px;font-weight:800;color:#b42323;line-height:1;font-variant-numeric:tabular-nums}
+.prio-score small{font-size:12px;font-weight:500;color:var(--ink2);display:block;text-align:right}
+.prio-item{border-top:1px dashed #efc3c3;padding-top:7px}
+.prio-item b{display:block;font-size:14.5px}
+.prio-meta{font-size:12px;color:var(--ink2)}
+.rk-top{display:inline-block;min-width:24px;padding:1px 6px;border-radius:6px;background:#d03b3b;color:#fff;font-weight:700}
+@media (max-width:1200px){.g-kpi{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:980px){.g2{grid-template-columns:1fr}.app{grid-template-columns:1fr}aside{position:static;height:auto}.side-foot{display:none}nav{display:flex;flex-wrap:wrap;gap:4px}nav button{width:auto}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.kpi .lbl{font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.kpi .val{font-size:28px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .note{font-size:11.5px;color:var(--muted)}
+.btn{border:1px solid var(--axis);background:#fff;border-radius:8px;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--brand2);color:var(--brand)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand2);color:#fff}
+.btn.danger{color:#b42323;border-color:#e7b4b4}
+.btn.danger:hover{background:#fbeaea}
+.btn.sm{padding:4px 9px;font-size:12.5px}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn svg{width:15px;height:15px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--ink2);font-weight:600}
+input[type=text],input[type=number],input[type=search],input[type=password],select,textarea{border:1px solid var(--axis);border-radius:8px;padding:7px 10px;background:#fff;min-width:0;font-weight:400;color:var(--ink)}
+textarea{resize:vertical;min-height:60px}
+input:focus,select:focus,textarea:focus{outline:2px solid #9ec5f4;border-color:var(--accent)}
+.form-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.span2{grid-column:span 2}.span4{grid-column:1/-1}
+@media (max-width:760px){.form-grid{grid-template-columns:1fr 1fr}}
+.scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.scale input{position:absolute;opacity:0;pointer-events:none}
+.scale label{border:1px solid var(--axis);border-radius:8px;padding:7px 6px;cursor:pointer;text-align:center;font-size:12px;line-height:1.25;background:#fff;color:var(--ink2);min-height:58px;display:flex;flex-direction:column;justify-content:center}
+.scale label b{font-size:16px;color:var(--ink)}
+.scale input:checked+label{border-color:var(--brand);background:var(--brand-soft);color:var(--brand);box-shadow:inset 0 0 0 1px var(--brand)}
+.scale input:focus-visible+label{outline:2px solid #9ec5f4}
+.scale-hint{font-size:12px;color:var(--ink2);margin-top:4px;min-height:17px}
+.score-box{display:flex;gap:18px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px dashed var(--axis);border-radius:10px;padding:12px 16px}
+.score-box .big{font-size:30px;font-weight:800;font-variant-numeric:tabular-nums}
+.score-box .cap{font-size:12px;color:var(--ink2)}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.chip i{width:10px;height:10px;border-radius:3px;display:inline-block;flex:none}
+.pill{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;border:1px solid var(--axis);white-space:nowrap}
+.pill.Selesai{background:#e6f6e6;border-color:#9fd89f;color:#185c18}
+.pill.Proses{background:#fff5df;border-color:#f3d48e;color:#7a5200}
+.pill.Belum{background:#f1f1ef;color:#55544f}
+table.dt{width:100%;border-collapse:collapse;font-size:13px}
+table.dt th{position:sticky;top:0;background:#eef3f4;text-align:left;font-weight:600;padding:8px;border-bottom:1px solid var(--axis);cursor:pointer;user-select:none;white-space:nowrap;z-index:1}
+table.dt th.nosort{cursor:default}
+table.dt td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+table.dt tr:hover td{background:#fafaf7}
+table.dt td.num,table.dt th.num{text-align:center;font-variant-numeric:tabular-nums}
+.table-wrap{overflow:auto;max-height:66vh;border:1px solid var(--line);border-radius:8px;background:#fff}
+.muted{color:var(--muted)}.small{font-size:12px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.toolbar .grow{flex:1}
+.chart svg{display:block;width:100%;height:auto}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);margin:2px 0 8px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+#tip{position:fixed;pointer-events:none;background:#0b0b0b;color:#fff;font-size:12.5px;padding:7px 10px;border-radius:7px;max-width:320px;z-index:50;display:none;line-height:1.35;box-shadow:0 4px 14px rgba(0,0,0,.2)}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#0b0b0b;color:#fff;padding:10px 16px;border-radius:8px;z-index:60;display:none;max-width:90vw}
+.modal-bg{position:fixed;inset:0;background:rgba(10,20,25,.45);display:none;align-items:flex-start;justify-content:center;z-index:40;padding:40px 16px;overflow:auto}
+.modal{background:#fff;border-radius:12px;max-width:980px;width:100%;padding:20px 22px}
+.modal h2{margin:0 0 6px;font-size:18px}
+.banner{background:#fff8e6;border:1px solid #f3d48e;border-radius:8px;padding:9px 12px;font-size:13px;margin-bottom:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.ref-table{border-collapse:collapse;width:100%;font-size:13px}
+.ref-table td,.ref-table th{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+.ref-table th{background:#eef3f4}
+.hidden{display:none!important}
+body:not(.mode-server) .server-only{display:none!important}
+body.mode-server:not(.role-admin) .admin-only{display:none!important}
+body.role-pimpinan .write-only{display:none!important}
+#login{position:fixed;inset:0;background:linear-gradient(135deg,#0f4c5c,#13677b);display:none;align-items:center;justify-content:center;z-index:80;padding:20px}
+#login form{background:#fff;border-radius:14px;padding:28px 28px 22px;width:100%;max-width:380px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.user-chip{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px}
+.user-chip button{background:rgba(255,255,255,.12);border:0;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11.5px}
+body.mode-view .edit-only,body.src-excel .edit-only,body.src-excel .dash-only{display:none!important}
+.mode-tag{display:inline-block;margin-top:4px;background:#fff;color:var(--brand);font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:99px;letter-spacing:.3px}
+.steps{margin:6px 0 0;padding-left:20px;font-size:13px;color:var(--ink2)}.steps li{margin:3px 0}
+.print-head{display:none}
+@media print{
+  @page{size:A4 landscape;margin:12mm}
+  body{background:#fff}
+  aside,.no-print,.btn,#tip,#toast{display:none!important}
+  .app{display:block}
+  main{padding:0}
+  .card,.kpi{break-inside:avoid;border-color:#ccc}
+  .print-head{display:block;margin-bottom:10px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g-kpi{grid-template-columns:repeat(5,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .table-wrap{max-height:none;overflow:visible}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside>
+  <div class="logo"><div class="logo-mark">ICRA</div><div><b>Dashboard ICRA</b><small id="logoSub">Komite PPI · Offline</small><div id="modeTag"></div></div></div>
+  <nav id="nav">
+    <button data-view="dashboard" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard Grafik</button>
+    <button data-view="input" class="write-only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>Input Data</button>
+    <button data-view="data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10M3 15h18"/></svg>Data &amp; Excel</button>
+    <button data-view="guide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 16v-4M12 8h.01"/></svg>Panduan Skor</button>
+    <button data-view="share" class="only-main"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg>Bagikan &amp; Gabung Data</button>
+    <button data-view="send" class="only-dept"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>Kirim Data ke PPI</button>
+    <button data-view="users" class="server-only admin-only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-5-6.7"/></svg>Pengguna &amp; Riwayat</button>
+    <button data-view="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>Pengaturan &amp; Backup</button>
+  </nav>
+  <div class="side-foot"><div><span class="dot"></span>Data tersimpan di komputer ini</div><div id="sideCount" style="margin-top:4px"></div><div id="sideBackup" style="margin-top:2px"></div></div>
+</aside>
+<main id="main"></main>
+</div>
+<div id="tip"></div><div id="toast"></div>
+<div id="login"><form id="loginForm" autocomplete="on"><div style="display:flex;gap:10px;align-items:center"><div class="logo-mark" style="background:var(--brand);color:#fff">ICRA</div><div><b style="font-size:17px">Dashboard ICRA</b><div class="small muted" id="loginHosp">Komite PPI</div></div></div>
+<p class="small muted" style="margin:0">Masuk dengan akun yang diberikan oleh Komite PPI.</p>
+<label class="f">Username<input type="text" name="username" autocomplete="username" required autofocus></label>
+<label class="f">Password<input type="password" name="password" autocomplete="current-password" required></label>
+<div id="loginErr" class="small" style="color:#b42323;min-height:16px"></div>
+<button class="btn primary" style="justify-content:center">Masuk</button>
+<p class="small muted" style="margin:0;text-align:center">Akses hanya dari jaringan internal rumah sakit</p></form></div>
+<div class="modal-bg" id="modalBg"><div class="modal" id="modal"></div></div>
+<input type="file" id="fileXlsx" accept=".xlsx,.xlsm" class="hidden">
+<input type="file" id="fileJson" accept=".json" class="hidden">
+
+<script>
+/* ===================== DATA AWAL (dari file Excel ICRA SHTB 2026) ===================== */
+const SEED = {"records":[{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian CAUTI","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian CLABSI","L":2,"I":2,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian BSI di hemodialisa","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian VAP","L":2,"I":2,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian HAP","L":2,"I":2,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian SSI","L":2,"I":3,"S":3},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Bundle HAIs","masalah":"Ketidakpatuhan Pelaksanaan Bundles CAUTI","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Bundle HAIs","masalah":"Ketidakpatuhan Pelaksanaan Bundles CLABSI","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Bundle HAIs","masalah":"Ketidakpatuhan Pelaksanaan Bundle VAP","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Bundle HAIs","masalah":"Ketidakpatuhan Pelaksanaan Bundle SSI","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"MDRO","masalah":"Kasus HA MDRO","L":3,"I":3,"S":3},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"MDRO","masalah":"Ketidakpatuhan pelaksanaan skrining MRSA","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Emerging - Reemerging Disease","masalah":"Kasus baru Pandemic Covid-19","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Emerging - Reemerging Disease","masalah":"Staff Terpapar Covid-19","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Emerging - Reemerging Disease","masalah":"Kurangnya ketersediaan Fasilitas penunjang penatalaksanaan COVID","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Emerging - Reemerging Disease","masalah":"Kurangnya pengetahuan staff terkait penatalaksanaan covid 19","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Emerging - Reemerging Disease","masalah":"Ketidakpatuhan petugas melakukan protokol kesehatan","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Laboratorium","masalah":"Pembuangan darah dan komponen darah belum sesuai prosedur","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Laboratorium","masalah":"Pembuangan jarum suntik bekas dan benda tajam lainnya belum sesui prosedur (tidak kedalam sharpbox)","L":2,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Laboratorium","masalah":"Tumpahan sampel pemeriksaan","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Perawatan pasien infeksius","masalah":"Perawatan pasien MDRO tidak sesuai prosedur","L":2,"I":3,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Ruangan Operasi","masalah":"Kebersihan lingkungan OT – lantai, dinding, plafon, meja, lampu operasi.","L":2,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Ruangan Operasi","masalah":"Kualitas udara/HVAC – tekanan positif, ACH, suhu, kelembapan, filter.","L":2,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Ruangan Operasi","masalah":"Hand hygiene & APD – kepatuhan petugas dan surgical attire.","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Ruangan Operasi","masalah":"SSI prevention bundle – skin preparation, antibiotic prophylaxis, asepsis, dll.","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"ICU","masalah":"Kebersihan lingkungan – lantai, permukaan, bed, dan high-touch area.","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Isolasi (Penempatan pasien )","masalah":"Airborne precaution tidak sesuai prosedur","L":2,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Isolasi (Penempatan pasien )","masalah":"Droplet precaution tidak sesuai prosedur","L":2,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Isolasi (Penempatan pasien )","masalah":"Contact precaution tidak sesuai prosedur","L":2,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"HD","masalah":"Pemisahan pasien infeksius dan non infeksius tidak dilaksanakan sesuai prosedur","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"HD","masalah":"Terjadi kontaminasi water treatment hemodialisa","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"Dental","masalah":"Dental waterline tidak dilakukan treatment","L":5,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"Dental","masalah":"Dental Handpiece tidak dilakukan pembersihan","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"Endoskopi","masalah":"Proses pencucian endoskop tidak optimal","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"Endoskopi","masalah":"Penyimpanan endoskop tidak sesuai standar","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Prosedur/tindakan-tindakan berisiko tinggi","subgrup":"Aseptik teknik","masalah":"Teknik aseptik Pemberian obat IV tidak dilakukan secara optimal","L":2,"I":2,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Prosedur/tindakan-tindakan berisiko tinggi","subgrup":"Aseptik teknik","masalah":"Peralatan yang digunakan tidak steril","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Prosedur/tindakan-tindakan berisiko tinggi","subgrup":"Aseptik teknik","masalah":"Cairan yang digunakan kadaluarsa","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan distribusi linen bersih dan kotor","subgrup":"Linen","masalah":"Terlambatnya kedatangan distribusi linen bersih di ruangan","L":2,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan distribusi linen bersih dan kotor","subgrup":"Linen","masalah":"Penanganan linen bersih tidak sesuai prosedur","L":2,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan distribusi linen bersih dan kotor","subgrup":"Linen","masalah":"Penyimpanan linen bersih tidak sesuai prosedur","L":2,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan distribusi linen bersih dan kotor","subgrup":"Linen","masalah":"Troley linen kotor tidak tertutup","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan distribusi linen bersih dan kotor","subgrup":"Linen","masalah":"Linen kotor tidak diletakkan pada tempatnya","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pengelolaan linen/laundri","subgrup":"Laundry","masalah":"Proses pencucian linen tidak optimal (masih ada noda)","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pengelolaan linen/laundri","subgrup":"Laundry","masalah":"Linen infeksius dan noninfeksius tidak ada pemisahan","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pengelolaan linen/laundri","subgrup":"Laundry","masalah":"Penyimpanan linen belum sesuai standar","L":2,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pengelolaan linen/laundri","subgrup":"Laundry","masalah":"Alur linen bersih dan kotor bercampur","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Pembersihan desinfeksi dan sterilisasi tidak optimal","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Proses pengeringan tidak optimal","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Penanganan SUDs/ alat yang diproses ulang tidak potimal dilakukan","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Rak Penyimpanan alat steril kurang bersih","L":2,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Penggunaan alat reuse melewati batas yang ditentukan","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Peralatan yang kadarluarsa","L":2,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Kebersihan permukaan dan lingkungan","subgrup":"Kebersihan","masalah":"Kebersihan lingkungan tidak optimal (debu, sisa tempelan, karat)","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Kebersihan permukaan dan lingkungan","subgrup":"Kebersihan","masalah":"Kerapihan ruangan kurang","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Kebersihan permukaan dan lingkungan","subgrup":"Kebersihan","masalah":"Fasilitas peralatan kebersihan tidak dilakukan pencucian","L":3,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Kebersihan permukaan dan lingkungan","subgrup":"Kebersihan","masalah":"Pembersihan bed pasien tidak dilakukan optimal","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Kebersihan permukaan dan lingkungan","subgrup":"Kebersihan","masalah":"Alat medis tidak dilakukan pembersihan antar pasien","L":1,"I":1,"S":3},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pengelolaan sampah","subgrup":"Limbah","masalah":"Ketidakpatuhan pemilahan pembuangan limbah domestik dan infeksius","L":3,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pengelolaan sampah","subgrup":"Limbah","masalah":"Tempat sampah terbuka/tidak tertutup","L":4,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pengelolaan sampah","subgrup":"Limbah","masalah":"Limbah tidak segera diangkut/menumpuk","L":3,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pengelolaan sampah","subgrup":"Limbah","masalah":"Limbah benda tajam di sharp container lebih dari 3/4 bagian","L":1,"I":3,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Pencucian bahan makanan tidak optimal","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Pencucian peralatan makan tidak optimal","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Pencucian peralatan memasak tidak optimal","L":4,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Penyimpanan bahan makanan tidak menggunakan sistem FIFO FEFO","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Kontaminasi makanan / ditemukan benda asing pada makanan","L":2,"I":2,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Suhu HOT troley untuk distribusi tidak sesuai","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Suhu penyimpanan bahan makanan tidak sesuai","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pengelolaan kamar jenazah","subgrup":"Mortuary","masalah":"Penanganan jenasah tidak optimal","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Pengelolaan kamar jenazah","subgrup":"Mortuary","masalah":"Petugas terpapar cairan tubuh jenazah","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Kegagalan tindakan pencegahan","subgrup":"Hand hygiene","masalah":"Ketidakpatuhan pelaksanaan hand hygiene dengan teknik benar","L":4,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Kegagalan tindakan pencegahan","subgrup":"Hand hygiene","masalah":"Sarana Hand hygiene tidak lengkap","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Kegagalan tindakan pencegahan","subgrup":"APD","masalah":"Ketidakpatuhan Penggunaan APD","L":2,"I":2,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Kegagalan tindakan pencegahan","subgrup":"APD","masalah":"Ketersediaan APD tidak lengkap","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Kegagalan tindakan pencegahan","subgrup":"Kesehatan Karyawan","masalah":"Kejadian Needle stick injury","L":3,"I":2,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Rrenovasi dan kontruksi","subgrup":"Renovasi","masalah":"Perencanaan PCRA yang tidak efektif","L":3,"I":1,"S":2},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Edukasi staff, pasien dan pengunjung","subgrup":"Edukasi staff","masalah":"Kurangnya pendidikan dan pelatihan staff terkait PPI","L":1,"I":1,"S":1},{"tahun":2026,"unit":"Seluruh Departemen","grup":"Edukasi staff, pasien dan pengunjung","subgrup":"Edukasi pasien dan pengunjung","masalah":"Kurangnya edukasi pasien terkait PPI dan pasien isolasi","L":2,"I":1,"S":2},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Staf","subgrup":"","masalah":"Pengetahuan staf terhadap praktik PPI kurang","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Staf","subgrup":"","masalah":"Kepatuhan kebersihan tangan rendah","L":4,"I":1,"S":2},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Staf","subgrup":"","masalah":"Pelaksanaan kewaspadaan standar dan tambahan belum patuh","L":3,"I":1,"S":2},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Staf","subgrup":"","masalah":"Kejadian terpapar cairan infeksius dan tertusuk jarum","L":4,"I":2,"S":2},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Prosedur dan proses asuhan invasif","subgrup":"","masalah":"Pemberian terapi cairan melalaui intravaskuler tidak dilakukan secara aseptik","L":2,"I":2,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Prosedur dan proses asuhan invasif","subgrup":"","masalah":"Penyimpanan obat intravena tidak sesuai prosedur","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Prosedur dan proses asuhan invasif","subgrup":"","masalah":"Pencampuran terapi cairan intravena dilakukan tidak sesuai prosedur","L":1,"I":1,"S":2},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Prosedur dan proses asuhan invasif","subgrup":"","masalah":"Pelaksanaan lumbal pungsi dilakukan tidak sesuai prosedur","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Fasilitas","subgrup":"","masalah":"Ketersediaan fasilitas cuci tangan, Alat pelindung diri, sharp Container, dan tempat sampah kurang","L":2,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Fasilitas","subgrup":"","masalah":"Kebersihan peralatan perawatan pasien kurang","L":3,"I":1,"S":2},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Fasilitas","subgrup":"","masalah":"Risiko infeksi yang terkait dengan proses alat sekali pakai","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Fasilitas","subgrup":"","masalah":"Pengawasan terhadap penggunaan antimikroba yang belum sesuai","L":2,"I":3,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Komunikasi","subgrup":"","masalah":"Komunikasi staf dengan ICLN kurang","L":3,"I":1,"S":2},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Komunikasi","subgrup":"","masalah":"Komunikasi ICLN dengan IPCN Kurang","L":3,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Komunikasi","subgrup":"","masalah":"Komunikasi IPCN dengan Depatemen lain kurang","L":3,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Lingkungan RS","subgrup":"","masalah":"infeksi sehubungan dengan renovasi dan konstruksi bangunan","L":1,"I":1,"S":2},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Lingkungan RS","subgrup":"","masalah":"Infeksi dari kontaminasi air HD","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Lingkungan RS","subgrup":"","masalah":"Infeksi dari kontaminasi air baku","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Lingkungan RS","subgrup":"","masalah":"Infeksi dari proses pembersihan lingkungan yang tidak adekuat","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Lingkungan RS","subgrup":"","masalah":"Infeksi dari sistem ventilasi","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Lingkungan RS","subgrup":"","masalah":"Infeksi dari proses penyediaan makanan","L":4,"I":1,"S":2},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Lingkungan RS","subgrup":"","masalah":"Infeksi dari proses pengolahan linen","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Lingkungan RS","subgrup":"","masalah":"Infeksi dari proses pemulasaraan jenazah","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Lingkungan RS","subgrup":"","masalah":"Infeksi dari proses pengelolaan limbah/sampah","L":3,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Surveilans","subgrup":"","masalah":"SSI","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Surveilans","subgrup":"","masalah":"ISK","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Surveilans","subgrup":"","masalah":"VAP","L":2,"I":3,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Surveilans","subgrup":"","masalah":"CLABSI","L":2,"I":3,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Surveilans","subgrup":"","masalah":"CA-MRSA","L":2,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Surveilans","subgrup":"","masalah":"HA-MDRO spesimen","L":3,"I":3,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Surveilans","subgrup":"","masalah":"Plebhitis","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Surveilans","subgrup":"","masalah":"Emerging & Reemerging Disease","L":1,"I":1,"S":1},{"tahun":2026,"unit":"RS SHTB (Prioritisasi)","grup":"Surveilans","subgrup":"","masalah":"Outbreak (wabah) penyakit infeksi","L":1,"I":1,"S":1}],"suggestions":{"Limbah B3":[{"grup":"Fasilitas","masalah":"Terdapat tempat sampah yang rusak"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Keterlambatan pengangkutan limbah oleh pihak ketiga"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Belum dilakukan desinfeksi limbah rutin di TPS"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"kurangnya kepatuhan petugas untuk memisahkan pembuangan sampah infeksius dan non infeksius"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"kurangnya kepatuhan petugas untuk membuang sampah benda tajam kedalam sharpbox"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"kurangnya kepatuhan petugas dalam menggunakan APD saat membuang sampah"},{"grup":"Kebijakan dan Prosedur","masalah":"Belum tersedia SOP eye wash dan body wash di TPS"},{"grup":"Kebijakan dan Prosedur","masalah":"Belum terdapat pelaporan tumpahan limbah"},{"grup":"Pengetahuan dan Keterampilan Staf","masalah":"Belum dilakukan sosialisasi tentang penempelan label limbah infeksius"},{"grup":"Lingkungan","masalah":"Kurangnya kebersihan TPS dan area sekitar"}],"Gizi / Kitchen":[{"grup":"Fasilitas","masalah":"Ketersediaan chiller"},{"grup":"Fasilitas","masalah":"Ketersediaan freezer"},{"grup":"Fasilitas","masalah":"Ketersediaan hot trolley"},{"grup":"Fasilitas","masalah":"Ruang cuci sayur"},{"grup":"Fasilitas","masalah":"Fasilitas kebersihan tangan"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Pemakaian APD"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Kepatuhan kebersihan tangan saat 5 moment di dapur"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Aktivitas pencucian bahan makanan : sayuran"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Aktivitas pencucian alat makan (piring, sendok,dll)"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Penyimpanan bahan makanan"},{"grup":"Kebijakan dan Prosedur","masalah":"Panduan Penyelenggaraan Makanan dan Higiene, Sanitasi Penyelenggaraan Makanan RS (Regulasi)"},{"grup":"Kebijakan dan Prosedur","masalah":"SPO Pemeriksaan Kesehatan Karyawan Dapur"},{"grup":"Pengetahuan dan Ketrampilan Staff","masalah":"Pengetahuan tentang keamanan makanan"},{"grup":"Pengetahuan dan Ketrampilan Staff","masalah":"Keterampilan mencuci tangan 6 langkah"},{"grup":"Lingkungan","masalah":"Lantai kotor/licin"},{"grup":"Lingkungan","masalah":"Kebersihan dapur"},{"grup":"Lingkungan","masalah":"Serangga di dapur : kecoak, lalat"},{"grup":"Lingkungan","masalah":"Kebersihan hot trolley"},{"grup":"Lingkungan","masalah":"Kebersihan peralatan dapur"}],"Mortuary":[{"grup":"Fasilitas","masalah":"Ketersediaan APD tidak lengkap"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Risko pajanan cairan tubuh ke petugas"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Ketidaksesuaian fasilitas dan denah ruang mortuary"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Labeling jenazah tidak sesuai"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Proses serah terima barang bawaan jenazah tidak lengkap"},{"grup":"Kebijakan dan Prosedur","masalah":"Penyusunan pedoman pelayanan mortuary SHDP"},{"grup":"Lingkungan","masalah":"kebersihan dan kerapian ruangan kurang"}],"Linen":[{"grup":"Fasilitas","masalah":"Tidak berfungsinya alat reader pada saat penghitungan linen"},{"grup":"Fasilitas","masalah":"Kurangnya jumlah trolly linen kotor di beberapa ruangan"},{"grup":"Fasilitas","masalah":"Terlambatnya kedatangan mobil pengantar linen bersih"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Masih di temukan linen kotor yang diletakan di atas tutup trolly linen kotor, (trolly linen kotor tidak dibuka penutupnya)"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Ketidak patuhan user dalam meletakan linen kotor sehabis pakai"},{"grup":"Kebijakan dan Prosedur","masalah":"SPO Tata cara pemakaian reader"},{"grup":"Kebijakan dan Prosedur","masalah":"SPO penurunan gorden di ruang isolasi"},{"grup":"Lingkungan","masalah":"Tersedianya lingkungan yang terjaga kebersihannya , dengan suhu dan kelembaban yang sesuai persyaratan."}],"Laundry":[{"grup":"Aktivitas Pencegahan Infeksi","masalah":"petugas tidak menggunakan APD"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"tidak memisahkan linen ternoda darah dan tanpa noda darah"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"tidak memasukan linen dalam kantung serta mengikat saat 2/3 kantung terisi"}],"Aseptik & Cairan IV":[{"grup":"Fasilitas","masalah":"Material infus set"},{"grup":"Fasilitas","masalah":"Pencampuran obat tidak dilakukan di ruang obat (clean utility)"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Plebitis :"},{"grup":"Kebijakan dan Prosedur","masalah":"SPO pemasangan Invansive pada vena perifer belum optimal dilaksanakan"},{"grup":"Kebijakan dan Prosedur","masalah":"BUNDLE IADP belum optimal dilaksanakan"},{"grup":"Pengetahuan dan Ketrampilan Staff","masalah":"Perawat belum optimal melakukan teknik septik - aseptik saat pemberian obat melalui Infus"},{"grup":"Pengetahuan dan Ketrampilan Staff","masalah":"perawat memasang infus >2 kali penusukan"},{"grup":"Pengetahuan dan Ketrampilan Staff","masalah":"Petugas cuci tangan tidak 5 moment"}],"CSSD":[{"grup":"Fasilitas","masalah":"peralatan untuk pencucian instrumen tidak lengkap"},{"grup":"Fasilitas","masalah":"Tersedia ruangan penyimpanan alat steril yang memadai , sesuai kebutuhan"},{"grup":"Fasilitas","masalah":"Tersedia rak penyimpanan alat steril yang memadai"},{"grup":"Fasilitas","masalah":"Tersedia lemari berkunci untuk penyimpanan peralatan yang sensitif"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Kepatuhan dalam mengatur dan menyimpan peralatan yang sudah steril sesuai standart yang berlaku"},{"grup":"Kebijakan dan Prosedur","masalah":"SOP penyimpanan peralatan steril"},{"grup":"Pengetahuan dan Keterampilan Staf","masalah":"Evaluasi dan monitoring penyimpanan alat steril"},{"grup":"Lingkungan","masalah":"Tersedianya lingkungan yang terjaga kebersihannya , dengan suhu dan kelembaban yang sesuai persyaratan."}],"Laboratorium":[{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Kurang patuh cuci tangan sebelum dan sesudah menyentuh pasien"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Pencegahan tertusuk jarum belum berjalan"}],"Farmasi":[{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Ketidak patuhan staf terhadap cuci tangan"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Kebersihan Lingkungan Farmasi belum berjalan"}],"Radiologi":[{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Kurang patuh cuci tangan sebelum dan sesudah menyentuh pasien"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Ketidakpatuhan mengunakan APD"}],"Endoskopi":[{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Kurang patuh cuci tangan sebelum dan sesudah menyentuh pasien"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Ketidakpatuhan mengunakan APD"}],"Hemodialisa":[{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Kurang patuh cuci tangan sebelum dan sesudah menyentuh pasien"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Ketidakpatuhan mengunakan APD"}],"Dental":[{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Kurang patuh cuci tangan sebelum dan sesudah menyentuh pasien"},{"grup":"Aktivitas Pencegahan Infeksi","masalah":"Ketidakpatuhan mengunakan APD"}],"LDS":[],"Covid-19":[{"grup":"","masalah":"Belum tersedianya alur pelayanan pasien Covid-19"},{"grup":"","masalah":"Kurangnya fasilitas APD Covid -19"},{"grup":"","masalah":"Kurangnya kepatuhan memakai dan melepas APD Covid -19"},{"grup":"","masalah":"Kurangnya fasilitas Ruang Isolasi Covid-19"},{"grup":"","masalah":"Kurangnya pengetahuan petugas, pasien , keluarga dan masyarakat tentang Covid-19"},{"grup":"","masalah":"Kurangnya kepatuhan penanganan Limbah Covid -19"},{"grup":"","masalah":"Kurangnya kepatuhan pengelolaan Linen Covid -19"},{"grup":"","masalah":"Kurangnya kepatuhan Desinfeksi, Dekontaminasi dan Sterilisasi Peralatan ,ruangan dan ambulance Covid -19"},{"grup":"","masalah":"Belum adanya surveilen Covid -19"},{"grup":"","masalah":"Kurangnya perlindungan kesehatan dan keselamatan karyawan Covid -19"},{"grup":"","masalah":"Kurangnya kepatuhan kewaspadaan standar dan transmisi Covid -19"},{"grup":"","masalah":"Belum adanya Program Kerja Komite PPI terkait Covid -19"},{"grup":"","masalah":"Kurangnya fasilitas penunjang Covid-19"},{"grup":"","masalah":"Kurangnya kepatuhan tindakan Invasif covid 19"},{"grup":"","masalah":"Belum terlaksananya pengelolaan Jenazah covid 19"}],"Seluruh Departemen":[],"RS SHTB (Prioritisasi)":[]},"master":{"label":"ICRA ALL DEP 27","tahun":2027,"items":[{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian CAUTI"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian CLABSI"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian BSI di hemodialisa"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian VAP"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian HAP"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"HAIs","masalah":"Kejadian SSI"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Bundle HAIs","masalah":"Ketidakpatuhan Pelaksanaan Bundles CAUTI"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Bundle HAIs","masalah":"Ketidakpatuhan Pelaksanaan Bundles CLABSI"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Bundle HAIs","masalah":"Ketidakpatuhan Pelaksanaan Bundle VAP"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Bundle HAIs","masalah":"Ketidakpatuhan Pelaksanaan Bundle SSI"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"MDRO","masalah":"Kasus HA MDRO"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"MDRO","masalah":"Ketidakpatuhan pelaksanaan skrining MRSA"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Emerging - Reemerging Disease","masalah":"Kasus baru Pandemic Covid-19"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Emerging - Reemerging Disease","masalah":"Staff Terpapar Covid-19"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Emerging - Reemerging Disease","masalah":"Kurangnya ketersediaan Fasilitas penunjang penatalaksanaan COVID"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Emerging - Reemerging Disease","masalah":"Kurangnya pengetahuan staff terkait penatalaksanaan covid 19"},{"grup":"Infeksi-infeksi yang penting secara epidemiologis (surveilans)","subgrup":"Emerging - Reemerging Disease","masalah":"Ketidakpatuhan petugas melakukan protokol kesehatan"},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Laboratorium","masalah":"Pembuangan darah dan komponen darah belum sesuai prosedur"},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Laboratorium","masalah":"Pembuangan jarum suntik bekas dan benda tajam lainnya belum sesui prosedur (tidak kedalam sharpbox)"},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Laboratorium","masalah":"Tumpahan sampel pemeriksaan"},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Perawatan pasien infeksius","masalah":"Perawatan pasien MDRO tidak sesuai prosedur"},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Ruangan Operasi","masalah":"Kebersihan lingkungan OT – lantai, dinding, plafon, meja, lampu operasi."},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Ruangan Operasi","masalah":"Kualitas udara/HVAC – tekanan positif, ACH, suhu, kelembapan, filter."},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Ruangan Operasi","masalah":"Hand hygiene & APD – kepatuhan petugas dan surgical attire."},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Ruangan Operasi","masalah":"SSI prevention bundle – skin preparation, antibiotic prophylaxis, asepsis, dll."},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"ICU","masalah":"Kebersihan lingkungan – lantai, permukaan, bed, dan high-touch area."},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Isolasi (Penempatan pasien )","masalah":"Airborne precaution tidak sesuai prosedur"},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Isolasi (Penempatan pasien )","masalah":"Droplet precaution tidak sesuai prosedur"},{"grup":"Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi","subgrup":"Isolasi (Penempatan pasien )","masalah":"Contact precaution tidak sesuai prosedur"},{"grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"HD","masalah":"Pemisahan pasien infeksius dan non infeksius tidak dilaksanakan sesuai prosedur"},{"grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"HD","masalah":"Terjadi kontaminasi water treatment hemodialisa"},{"grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"Dental","masalah":"Dental waterline tidak dilakukan treatment"},{"grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"Dental","masalah":"Dental Handpiece tidak dilakukan pembersihan"},{"grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"Endoskopi","masalah":"Proses pencucian endoskop tidak optimal"},{"grup":"Pelayanan yang menggunakan peralatan yang berisiko infeksi","subgrup":"Endoskopi","masalah":"Penyimpanan endoskop tidak sesuai standar"},{"grup":"Prosedur/tindakan-tindakan berisiko tinggi","subgrup":"Aseptik teknik","masalah":"Teknik aseptik Pemberian obat IV tidak dilakukan secara optimal"},{"grup":"Prosedur/tindakan-tindakan berisiko tinggi","subgrup":"Aseptik teknik","masalah":"Peralatan yang digunakan tidak steril"},{"grup":"Prosedur/tindakan-tindakan berisiko tinggi","subgrup":"Aseptik teknik","masalah":"Cairan yang digunakan kadaluarsa"},{"grup":"Pelayanan distribusi linen bersih dan kotor","subgrup":"Linen","masalah":"Terlambatnya kedatangan distribusi linen bersih di ruangan"},{"grup":"Pelayanan distribusi linen bersih dan kotor","subgrup":"Linen","masalah":"Penanganan linen bersih tidak sesuai prosedur"},{"grup":"Pelayanan distribusi linen bersih dan kotor","subgrup":"Linen","masalah":"Penyimpanan linen bersih tidak sesuai prosedur"},{"grup":"Pelayanan distribusi linen bersih dan kotor","subgrup":"Linen","masalah":"Troley linen kotor tidak tertutup"},{"grup":"Pelayanan distribusi linen bersih dan kotor","subgrup":"Linen","masalah":"Linen kotor tidak diletakkan pada tempatnya"},{"grup":"Pengelolaan linen/laundri","subgrup":"Laundry","masalah":"Proses pencucian linen tidak optimal (masih ada noda)"},{"grup":"Pengelolaan linen/laundri","subgrup":"Laundry","masalah":"Linen infeksius dan noninfeksius tidak ada pemisahan"},{"grup":"Pengelolaan linen/laundri","subgrup":"Laundry","masalah":"Penyimpanan linen belum sesuai standar"},{"grup":"Pengelolaan linen/laundri","subgrup":"Laundry","masalah":"Alur linen bersih dan kotor bercampur"},{"grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Pembersihan desinfeksi dan sterilisasi tidak optimal"},{"grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Proses pengeringan tidak optimal"},{"grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Penanganan SUDs/ alat yang diproses ulang tidak potimal dilakukan"},{"grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Rak Penyimpanan alat steril kurang bersih"},{"grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Penggunaan alat reuse melewati batas yang ditentukan"},{"grup":"Pelayanan sterilisasi alat","subgrup":"CSSD","masalah":"Peralatan yang kadarluarsa"},{"grup":"Kebersihan permukaan dan lingkungan","subgrup":"Kebersihan","masalah":"Kebersihan lingkungan tidak optimal (debu, sisa tempelan, karat)"},{"grup":"Kebersihan permukaan dan lingkungan","subgrup":"Kebersihan","masalah":"Kerapihan ruangan kurang"},{"grup":"Kebersihan permukaan dan lingkungan","subgrup":"Kebersihan","masalah":"Fasilitas peralatan kebersihan tidak dilakukan pencucian"},{"grup":"Kebersihan permukaan dan lingkungan","subgrup":"Kebersihan","masalah":"Pembersihan bed pasien tidak dilakukan optimal"},{"grup":"Kebersihan permukaan dan lingkungan","subgrup":"Kebersihan","masalah":"Alat medis tidak dilakukan pembersihan antar pasien"},{"grup":"Pengelolaan sampah","subgrup":"Limbah","masalah":"Ketidakpatuhan pemilahan pembuangan limbah domestik dan infeksius"},{"grup":"Pengelolaan sampah","subgrup":"Limbah","masalah":"Tempat sampah terbuka/tidak tertutup"},{"grup":"Pengelolaan sampah","subgrup":"Limbah","masalah":"Limbah tidak segera diangkut/menumpuk"},{"grup":"Pengelolaan sampah","subgrup":"Limbah","masalah":"Limbah benda tajam di sharp container lebih dari 3/4 bagian"},{"grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Pencucian bahan makanan tidak optimal"},{"grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Pencucian peralatan makan tidak optimal"},{"grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Pencucian peralatan memasak tidak optimal"},{"grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Penyimpanan bahan makanan tidak menggunakan sistem FIFO FEFO"},{"grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Kontaminasi makanan / ditemukan benda asing pada makanan"},{"grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Suhu HOT troley untuk distribusi tidak sesuai"},{"grup":"Penyediaan makanan","subgrup":"Food safety","masalah":"Suhu penyimpanan bahan makanan tidak sesuai"},{"grup":"Pengelolaan kamar jenazah","subgrup":"Mortuary","masalah":"Penanganan jenasah tidak optimal"},{"grup":"Pengelolaan kamar jenazah","subgrup":"Mortuary","masalah":"Petugas terpapar cairan tubuh jenazah"},{"grup":"Kegagalan tindakan pencegahan","subgrup":"Hand hygiene","masalah":"Ketidakpatuhan pelaksanaan hand hygiene dengan teknik benar"},{"grup":"Kegagalan tindakan pencegahan","subgrup":"Hand hygiene","masalah":"Sarana Hand hygiene tidak lengkap"},{"grup":"Kegagalan tindakan pencegahan","subgrup":"APD","masalah":"Ketidakpatuhan Penggunaan APD"},{"grup":"Kegagalan tindakan pencegahan","subgrup":"APD","masalah":"Ketersediaan APD tidak lengkap"},{"grup":"Kegagalan tindakan pencegahan","subgrup":"Kesehatan Karyawan","masalah":"Kejadian Needle stick injury"},{"grup":"Rrenovasi dan kontruksi","subgrup":"Renovasi","masalah":"Perencanaan PCRA yang tidak efektif"},{"grup":"Edukasi staff, pasien dan pengunjung","subgrup":"Edukasi staff","masalah":"Kurangnya pendidikan dan pelatihan staff terkait PPI"},{"grup":"Edukasi staff, pasien dan pengunjung","subgrup":"Edukasi pasien dan pengunjung","masalah":"Kurangnya edukasi pasien terkait PPI dan pasien isolasi"}]}};
+/* Mode aplikasi: main = file utama IPCN, dept = file input departemen, view = laporan baca-saja */
+const CONFIG = /*__CONFIG__*/{"mode":"main","simple":true}/*__CONFIG_END__*/;
+const MODE = CONFIG.mode||'main';
+const SIMPLE = !!CONFIG.simple; // versi offline sederhana: tanpa fitur Bagikan/OneDrive
+const SOURCE_HTML = '<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+
+/* ===================== KONSTANTA SKOR ===================== */
+const SC = {
+  L:{name:'Likelihood / Probability',short:'Likelihood',
+     lbl:{5:'Expect it',4:'Likely',3:'Maybe',2:'Rare',1:'Never'},
+     desc:{5:'Sering (>6–12x/tahun)',4:'Agak sering (5–6x/tahun)',3:'Kadang-kadang (3–4x/tahun)',2:'Jarang (1–2x/tahun)',1:'Tidak pernah'}},
+  I:{name:'Consequences / Impact',short:'Impact',
+     lbl:{5:'Catastrophic loss',4:'Serious loss',3:'Prolonged LOS',2:'Moderate',1:'Minimal'},
+     desc:{5:'Catastrophic loss (life/limb/function/financial/legal) – kematian yang tidak berhubungan dengan penyakit',4:'Serious loss (function/financial/legal) – cedera berat, cacat, kehilangan fungsi irreversible',3:'Prolonged length of stay – cedera sedang, fungsi berkurang reversible, memperpanjang hari rawat',2:'Moderate clinical/financial – cedera ringan, dapat diatasi dengan pertolongan sederhana',1:'Minimal clinical/financial – tidak ada cedera'}},
+  S:{name:'Current System',short:'Current System',
+     lbl:{5:'None',4:'Poor',3:'Fair',2:'Good',1:'Solid'},
+     desc:{5:'Peraturan tidak ada',4:'Peraturan ada, fasilitas tidak ada, tidak dilaksanakan',3:'Peraturan ada, fasilitas ada, tidak dilaksanakan',2:'Peraturan ada, fasilitas ada, tidak selalu dilaksanakan',1:'Peraturan ada, fasilitas ada, dilaksanakan'}}
+};
+const LEVELS = [
+  {k:'Significant',range:'≥ 15',color:'#d03b3b',xl:'FFFF0000',ink:'#fff',act:'Rencana aksi segera; perlu perhatian Direksi (BOD). Bila tidak dapat diterima, pertimbangkan penghentian kegiatan.'},
+  {k:'High',range:'10–14',color:'#ec835a',xl:'FFFFC000',ink:'#0b0b0b',act:'Tindakan lanjutan (mungkin mendesak, butuh sumber daya besar) untuk menurunkan risiko.'},
+  {k:'Moderate',range:'5–9',color:'#fab219',xl:'FFFFFF00',ink:'#0b0b0b',act:'Tindakan lanjutan untuk menurunkan risiko dengan biaya proporsional.'},
+  {k:'Low',range:'1–4',color:'#0ca30c',xl:'FF92D050',ink:'#fff',act:'Tidak perlu kontrol tambahan; kontrol yang ada tetap efektif.'}
+];
+const LV = Object.fromEntries(LEVELS.map(l=>[l.k,l]));
+const levelOf = s => s>=15?'Significant':s>=10?'High':s>=5?'Moderate':'Low';
+const STATUS = ['Belum','Proses','Selesai'];
+const PPI_GROUPS = ['Infeksi-infeksi yang penting secara epidemiologis (surveilans)','Proses kegiatan di area-area yang berisiko tinggi terjadinya infeksi','Pelayanan yang menggunakan peralatan yang berisiko infeksi','Prosedur/tindakan-tindakan berisiko tinggi','Pelayanan distribusi linen bersih dan kotor','Pengelolaan linen/laundri','Pelayanan sterilisasi alat','Kebersihan permukaan dan lingkungan','Pengelolaan sampah','Penyediaan makanan','Pengelolaan kamar jenazah','Kegagalan tindakan pencegahan','Renovasi dan konstruksi','Edukasi staff, pasien dan pengunjung'];
+const DEFAULT_UNITS = ['IPD','OPD','Office','MCU','HD','LDS','Endos','OT','ICU','CSSD','NICU','Farmasi','Lab','Cathlab','Fisioterapi','Ruang prosedur','Dental','Emergency','Radiologi','Radioterapi','Kitchen','FO','Tenant','Linen dan laundry','Limbah','Renovasi'];
+const NEW_OPT='__new__';
+
+/* ===================== UTIL ===================== */
+const $ = (s,el=document)=>el.querySelector(s);
+const $$ = (s,el=document)=>[...el.querySelectorAll(s)];
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => 'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const norm = s => String(s??'').toLowerCase().replace(/\s+/g,' ').trim();
+const uniq = a => [...new Set(a.filter(x=>x!==undefined&&x!==null&&String(x).trim()!==''))];
+const trunc = (s,n)=> (s=String(s??'')).length>n ? s.slice(0,n-1)+'…' : s;
+const fmtDate = d => d? new Date(d).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'}) : '–';
+function toast(msg,ms=2600){const t=$('#toast');t.textContent=msg;t.style.display='block';clearTimeout(t._t);t._t=setTimeout(()=>t.style.display='none',ms)}
+function download(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+const chipHTML = k => `<span class="chip"><i style="background:${LV[k].color}"></i>${k}</span>`;
+function calc(r){const li=r.L*r.I,score=li*r.S;return {li,level:levelOf(score),score}} // tingkat risiko dari skor ICRA (L×I×S)
+
+/* ===================== DATABASE (IndexedDB) ===================== */
+const DB = {
+  db:null, records:[], settings:{},
+  open(){return new Promise((res,rej)=>{
+    if(!window.indexedDB){rej(new Error('Browser tidak mendukung IndexedDB'));return}
+    const rq=indexedDB.open(MODE==='dept'?'icra_departemen_db':'icra_dashboard_db',1);
+    rq.onupgradeneeded=()=>{const d=rq.result;
+      if(!d.objectStoreNames.contains('records'))d.createObjectStore('records',{keyPath:'id'});
+      if(!d.objectStoreNames.contains('settings'))d.createObjectStore('settings',{keyPath:'key'});};
+    rq.onsuccess=()=>{this.db=rq.result;res()};rq.onerror=()=>rej(rq.error);
+  })},
+  tx(store,mode){return this.db.transaction(store,mode).objectStore(store)},
+  all(store){return new Promise((res,rej)=>{const r=this.tx(store,'readonly').getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})},
+  async load(){this.records=await this.all('records');const s=await this.all('settings');this.settings=Object.fromEntries(s.map(x=>[x.key,x.value]))},
+  putMany(recs){return new Promise((res,rej)=>{const t=this.db.transaction('records','readwrite');const st=t.objectStore('records');recs.forEach(r=>st.put(r));t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})},
+  async save(rec){rec.updatedAt=new Date().toISOString();await this.putMany([rec]);const i=this.records.findIndex(x=>x.id===rec.id);if(i>=0)this.records[i]=rec;else this.records.push(rec)},
+  async saveMany(recs){const now=new Date().toISOString();recs.forEach(r=>r.updatedAt=r.updatedAt||now);await this.putMany(recs);const m=new Map(this.records.map(r=>[r.id,r]));recs.forEach(r=>m.set(r.id,r));this.records=[...m.values()]},
+  del(ids){return new Promise((res,rej)=>{const t=this.db.transaction('records','readwrite');const st=t.objectStore('records');ids.forEach(id=>st.delete(id));t.oncomplete=()=>{const s=new Set(ids);this.records=this.records.filter(r=>!s.has(r.id));res()};t.onerror=()=>rej(t.error)})},
+  clear(){return new Promise((res,rej)=>{const t=this.db.transaction('records','readwrite');t.objectStore('records').clear();t.oncomplete=()=>{this.records=[];res()};t.onerror=()=>rej(t.error)})},
+  setSetting(key,value){this.settings[key]=value;return new Promise((res,rej)=>{const t=this.db.transaction('settings','readwrite');t.objectStore('settings').put({key,value});t.oncomplete=()=>res();t.onerror=()=>rej(t.error)})},
+  get S(){return Object.assign({},{hospital:'Siloam Hospitals TB Simatupang',year:new Date().getFullYear(),maker:'Geyner Molinsqe Pattileuw',makerRole:'Infection Prevention Control Nurse',chair:'dr. Iradewi Karseno, SpAn-KAKV-KIC',chairRole:'Ketua Komite Pencegahan dan Pengendalian Infeksi',director:'dr. Dewi Wiguna, M.Sc',directorRole:'Direktur'},CONFIG.profile||{},this.settings.profile||{})}
+};
+function maxSeq(){return DB.records.reduce((m,r)=>Math.max(m,r.seq||0),0)}
+function seedRecords(){
+  if(!SEED) return [];
+  let seq=maxSeq();const now=new Date().toISOString();
+  return SEED.records.map(r=>({id:uid(),seq:++seq,tahun:r.tahun,unit:r.unit,grup:r.grup,subgrup:r.subgrup,masalah:r.masalah,L:r.L,I:r.I,S:r.S,status:'Belum',tujuan:'',indikator:'',rencana:'',pic:'',target:'',bukti:'',ket:'Impor awal dari Excel ICRA SHTB 2026',createdAt:now,updatedAt:now}));
+}
+
+/* ===================== MODE SERVER (jaringan internal) ===================== */
+let ME=null;
+async function api(path,opt={}){
+  const r=await fetch(path,{credentials:'same-origin',...opt,headers:{'Content-Type':'application/json','X-ICRA':'1',...(opt.headers||{})}});
+  let j={};try{j=await r.json()}catch(e){}
+  if(r.status===401&&path!=='/api/login'&&path!=='/api/me'){showLogin('Sesi berakhir, silakan login kembali.');throw new Error('Sesi berakhir')}
+  if(!r.ok)throw new Error(j.error||('Gagal ('+r.status+')'));return j;
+}
+const SERVER_GLOBAL=new Set(['profile','initialized']);
+const lsKey=k=>'icra_'+(ME?ME.username:'-')+'_'+k;
+if(MODE==='server'){
+  DB.open=async()=>{};
+  DB.load=async function(){const [a,b]=await Promise.all([api('/api/records'),api('/api/settings')]);this.records=a.records;
+    const loc={};['draft','lastBackup'].forEach(k=>{try{const v=localStorage.getItem(lsKey(k));if(v!==null)loc[k]=JSON.parse(v)}catch(e){}});
+    this.settings={...b.settings,...loc}};
+  DB.putMany=async function(recs){if(!recs.length)return;const j=await api('/api/records',{method:'POST',body:JSON.stringify({records:recs})});
+    const m=new Map(j.records.map(r=>[r.id,r]));recs.forEach(r=>{const s=m.get(r.id);if(s){r.updatedAt=s.updatedAt;r.updatedBy=s.updatedBy}})};
+  DB.del=async function(ids){await api('/api/records/delete',{method:'POST',body:JSON.stringify({ids})});const s=new Set(ids);this.records=this.records.filter(r=>!s.has(r.id))};
+  DB.clear=async function(){await api('/api/records/clear',{method:'POST',body:'{}'});this.records=[]};
+  DB.setSetting=async function(k,v){this.settings[k]=v;
+    if(SERVER_GLOBAL.has(k)){if(ME&&ME.role==='admin')await api('/api/settings',{method:'POST',body:JSON.stringify({key:k,value:v})});return}
+    try{if(v===null||v===undefined)localStorage.removeItem(lsKey(k));else localStorage.setItem(lsKey(k),JSON.stringify(v))}catch(e){}};
+}
+const isAdmin=()=>MODE!=='server'||(ME&&ME.role==='admin');
+function canEdit(r){
+  if(MODE==='view')return false;if(MODE!=='server')return !srcExcel();
+  if(!ME)return false;if(ME.role==='admin')return true;return ME.role==='departemen'&&ME.units.includes(r.unit);
+}
+function showLogin(msg){
+  $('#login').style.display='flex';$('#loginErr').textContent=msg||'';
+  const f=$('#loginForm');setTimeout(()=>f.username.focus(),50);
+  f.onsubmit=async e=>{e.preventDefault();$('#loginErr').textContent='';
+    try{await api('/api/login',{method:'POST',body:JSON.stringify({username:f.username.value,password:f.password.value})});location.reload()}
+    catch(err){$('#loginErr').textContent=err.message}};
+}
+async function logout(){try{await api('/api/logout',{method:'POST',body:'{}'})}catch(e){}location.reload()}
+const ROLE_LBL={admin:'Admin',departemen:'Departemen',pimpinan:'Pimpinan'};
+async function serverStart(){
+  let me=null;try{me=(await api('/api/me')).user}catch(e){}
+  if(!me){showLogin();return}
+  ME=me;document.body.classList.add('role-'+ME.role);
+  $('#logoSub').textContent='Server internal RS';$('#modeTag').innerHTML=`<span class="mode-tag">${ROLE_LBL[ME.role]||ME.role}</span>`;
+  $('.side-foot div').innerHTML='<span class="dot"></span>Data tersimpan di server RS';
+  $('.side-foot').insertAdjacentHTML('beforeend',`<div class="user-chip"><span>👤 ${esc(ME.name||ME.username)}</span><button onclick="logout()">Keluar</button></div>`);
+  try{await DB.load()}catch(err){$('#main').innerHTML=`<div class="card">Gagal memuat data dari server: ${esc(err.message)}</div>`;return}
+  if(ME.role==='admin'&&!DB.records.length&&!DB.settings.initialized){await DB.saveMany(seedRecords());await DB.setSetting('initialized',true)}
+  UI.input.tahun=DB.S.year;
+  if(ME.role==='departemen'){UI.input.unit=ME.units[0]||'';if(!DB.records.some(r=>ME.units.includes(r.unit)))VIEW='input'}
+  $$('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===VIEW));
+  render();
+  // ambil perubahan dari pengguna lain secara berkala
+  const sig=()=>DB.records.length+'|'+DB.records.reduce((m,r)=>r.updatedAt>m?r.updatedAt:m,'');
+  const refresh=async()=>{if(document.hidden||VIEW==='input'||$('#modalBg').style.display==='flex')return;const b=sig();try{await DB.load()}catch(e){return}if(sig()!==b)render()};
+  setInterval(refresh,60000);window.addEventListener('focus',refresh);
+}
+
+/* ranking: prioritas = urutan (dense) skor tertinggi dalam tiap Tahun + Unit */
+function ranks(recs){
+  const groups={};recs.forEach(r=>{(groups[r.tahun+'|'+r.unit]??=[]).push(r)});
+  const m={};
+  for(const g of Object.values(groups)){
+    const scores=[...new Set(g.map(r=>calc(r).score))].sort((a,b)=>b-a);
+    g.forEach(r=>m[r.id]=scores.indexOf(calc(r).score)+1);
+  }
+  return m;
+}
+function denseRank(list){const sc=[...new Set(list.map(r=>calc(r).score))].sort((a,b)=>b-a);const m={};list.forEach(r=>m[r.id]=sc.indexOf(calc(r).score)+1);return m}
+const PRIO_RED='#d03b3b', PRIO_OTHER='#86b6ef';
+const rkCell=n=>n<=3?`<span class="rk-top">${n}</span>`:n;
+const years = () => uniq(DB.records.map(r=>+r.tahun)).sort((a,b)=>b-a);
+const units = () => uniq(DB.records.map(r=>r.unit)).sort((a,b)=>a.localeCompare(b));
+
+/* ===================== NAVIGASI ===================== */
+let VIEW='dashboard';
+const UI = {dash:{tahun:null,unit:null},data:{q:'',tahun:'',unit:'',level:'',status:'',sort:'prio',dir:1},input:{editId:null,tahun:null,unit:'',src:0}};
+function go(v){VIEW=v;$$('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===v));render();window.scrollTo(0,0)}
+$('#nav').addEventListener('click',e=>{const b=e.target.closest('button');if(b)go(b.dataset.view)});
+const srcExcel=()=>MODE==='main'&&!SIMPLE&&(DB.settings.sourceMode||'excel')==='excel';
+function render(){
+  document.body.classList.toggle('src-excel',srcExcel());
+  const ib=$('#nav button[data-view=input]');if(ib&&MODE!=='view')ib.classList.toggle('hidden',srcExcel());
+  const sb=$('#nav button[data-view=share]');if(sb)sb.lastChild.textContent=srcExcel()?'Excel OneDrive & Bagikan':'Bagikan & Gabung Data';
+  if(srcExcel()&&VIEW==='input'){VIEW='dashboard';$$('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view==='dashboard'))}
+  if(MODE==='server'&&((VIEW==='users'&&!isAdmin())||(VIEW==='input'&&ME&&ME.role==='pimpinan')))VIEW='dashboard';
+  const v={dashboard:viewDashboard,input:viewInput,data:viewData,guide:viewGuide,settings:viewSettings,share:viewShare,send:viewSend,users:viewUsers}[VIEW]||viewDashboard;
+  $('#main').innerHTML='';v($('#main'));
+  $('#sideCount').textContent=DB.records.length+' item risiko · '+years().length+' tahun';
+  const lb=DB.settings.lastBackup;$('#sideBackup').textContent='Backup terakhir: '+(lb?fmtDate(lb):'belum pernah');
+  if(MODE==='view')$('#sideBackup').textContent='Data per '+fmtDate(CONFIG.createdAt);
+  if(MODE==='server')$('#sideBackup').textContent=ME?`${ROLE_LBL[ME.role]}${ME.units&&ME.units.length?' · '+ME.units.join(', '):''}`:'';
+  if(MODE==='dept')$('#sideBackup').textContent='Terakhir dikirim ke PPI: '+(DB.settings.lastSent?fmtDate(DB.settings.lastSent):'belum pernah');
+}
+function sourceBanner(){
+  if(!srcExcel())return '';const n=DB.settings.excelName,s=DB.settings.excelSync;
+  return n?`<div class="banner no-print" style="background:#eef5fd;border-color:#b9d4f3"><span>📗 Sumber data: <b>${esc(n)}</b> (Excel OneDrive) · sinkron terakhir ${s?fmtDate(s.at)+' '+new Date(s.at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):'belum pernah'}. Perubahan data dilakukan di Excel.</span>${FSA?'<button class="btn sm" id="bnSync">🔄 Sinkron sekarang</button>':''}</div>`
+   :`<div class="banner no-print" style="background:#eef5fd;border-color:#b9d4f3"><span>📗 Sumber data diatur ke <b>Excel OneDrive</b>, tetapi belum ada file Excel yang terhubung.</span><button class="btn sm" onclick="go('share')">Hubungkan file Excel</button></div>`;
+}
+document.addEventListener('click',e=>{if(e.target.closest('#bnSync'))syncExcel(true)});
+function backupBanner(){
+  if(MODE==='server')return '';
+  if(MODE==='view') return `<div class="banner"><span>👁 <b>Laporan baca-saja</b> · data per ${fmtDate(CONFIG.createdAt)}${CONFIG.scope?' · '+esc(CONFIG.scope):''} · disusun oleh ${esc(DB.S.maker)} (${esc(DB.S.makerRole)}). Untuk mengubah data, hubungi Komite PPI.</span></div>`;
+  if(MODE==='dept'){const n=DB.records.filter(r=>!DB.settings.lastSent||(r.updatedAt||'')>DB.settings.lastSent).length;
+    return n?`<div class="banner no-print"><span>📤 Ada <b>${n}</b> data yang belum dikirim ke Komite PPI. Data Anda baru masuk ke dashboard PPI setelah file data dikirim.</span><button class="btn sm" onclick="go('send')">Kirim data ke PPI</button></div>`:'';}
+  const lb=DB.settings.lastBackup; const days=lb?(Date.now()-new Date(lb))/864e5:999;
+  if(days<7||!DB.records.length) return '';
+  return `<div class="banner no-print"><span>⚠️ ${lb?'Backup terakhir '+Math.floor(days)+' hari lalu':'Data belum pernah di-backup'}. Data hanya tersimpan di browser komputer ini — simpan backup secara berkala.</span><button class="btn sm" data-act="backup">Backup sekarang</button></div>`;
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act="backup"]');if(b)backupJSON()});
+
+/* ===================== TOOLTIP ===================== */
+const tip=$('#tip');
+document.addEventListener('mousemove',e=>{
+  const t=e.target.closest('[data-tip]');
+  if(!t){tip.style.display='none';return}
+  tip.innerHTML=t.getAttribute('data-tip');tip.style.display='block';
+  const w=tip.offsetWidth,h=tip.offsetHeight;let x=e.clientX+14,y=e.clientY+14;
+  if(x+w>innerWidth-8)x=e.clientX-w-14;if(y+h>innerHeight-8)y=e.clientY-h-14;
+  tip.style.left=x+'px';tip.style.top=y+'px';
+});
+
+/* ===================== CHART (SVG) ===================== */
+const FONT='Segoe UI, system-ui, Arial, sans-serif';
+function roundedBar(x,y,w,h,dir){ // dir 'r' = rounded right end, 't' = rounded top
+  const r=Math.max(0,Math.min(4,w/2,h/2));
+  if(w<=0||h<=0) return '';
+  if(dir==='r') return `M${x},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h-r}Q${x+w},${y+h} ${x+w-r},${y+h}H${x}Z`;
+  return `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`;
+}
+function svgWrap(w,h,inner,title){return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" font-family="${FONT}" role="img" aria-label="${esc(title)}" data-title="${esc(title)}"><rect width="${w}" height="${h}" fill="#ffffff"/>${inner}</svg>`}
+function niceMax(v){if(v<=0)return 1;const p=Math.pow(10,Math.floor(Math.log10(v)));const n=v/p;return (n<=1?1:n<=2?2:n<=2.5?2.5:n<=5?5:10)*p}
+function ticks(max,n=5){const step=niceMax(max/n);const out=[];for(let v=0;v<=max+1e-9;v+=step)out.push(+v.toFixed(6));return out}
+
+/* horizontal bar; rows:[{label, segs:[{v,color,tip}], total, totalLabel}] */
+function hbarChart(rows,{title,labelW=250,width=640,barH=18,gap=8,xMax=null,axisLabel=''}={}){
+  if(!rows.length) return `<div class="empty">Belum ada data</div>`;
+  const top=8,bottom=34,right=40,h=top+rows.length*(barH+gap)+bottom;
+  const max=xMax||niceMax(Math.max(...rows.map(r=>r.total)));
+  const pw=width-labelW-right; const sx=v=>v/max*pw;
+  let s='';
+  ticks(max).forEach(t=>{const x=labelW+sx(t);s+=`<line x1="${x}" x2="${x}" y1="${top-4}" y2="${h-bottom+2}" stroke="#e1e0d9" stroke-width="1"/><text x="${x}" y="${h-bottom+16}" font-size="11" fill="#52514e" text-anchor="middle">${t}</text>`});
+  if(axisLabel) s+=`<text x="${labelW+pw/2}" y="${h-4}" font-size="11" fill="#52514e" text-anchor="middle">${esc(axisLabel)}</text>`;
+  rows.forEach((r,i)=>{
+    const y=top+i*(barH+gap);
+    s+=`<text x="${labelW-8}" y="${y+barH/2+4}" font-size="12" fill="#0b0b0b" text-anchor="end">${esc(trunc(r.label,Math.floor(labelW/7.2)))}</text>`;
+    let x=labelW;const segs=r.segs.filter(g=>g.v>0);
+    segs.forEach((g,j)=>{const last=j===segs.length-1;let w=sx(g.v);const drawW=last?w:Math.max(0,w-2);
+      s+=`<path d="${last?roundedBar(x,y,drawW,barH,'r'):`M${x},${y}h${drawW}v${barH}h${-drawW}Z`}" fill="${g.color}" data-tip="${esc(g.tip)}"/>`;x+=w});
+    s+=`<text x="${x+6}" y="${y+barH/2+4}" font-size="12" font-weight="600" fill="#0b0b0b">${esc(r.totalLabel??r.total)}</text>`;
+    s+=`<rect x="0" y="${y-gap/2}" width="${width}" height="${barH+gap}" fill="transparent" data-tip="${esc(r.rowTip||'')}" ${r.rowTip?'':'style="display:none"'}/>`;
+  });
+  s+=`<line x1="${labelW}" x2="${labelW}" y1="${top-4}" y2="${h-bottom+2}" stroke="#c3c2b7"/>`;
+  return svgWrap(width,h,s,title);
+}
+/* vertical columns; cols:[{label, segs:[{v,color,tip}]}] */
+function vbarChart(cols,{title,width=640,height=260,yLabel=''}={}){
+  if(!cols.length) return `<div class="empty">Belum ada data</div>`;
+  const left=44,right=12,top=14,bottom=46;const pw=width-left-right,ph=height-top-bottom;
+  const tot=cols.map(c=>c.segs.reduce((a,g)=>a+g.v,0));const max=niceMax(Math.max(1,...tot));
+  const sy=v=>v/max*ph;const slot=pw/cols.length;const bw=Math.min(64,slot*0.6);
+  let s='';
+  ticks(max).forEach(t=>{const y=top+ph-sy(t);s+=`<line x1="${left}" x2="${width-right}" y1="${y}" y2="${y}" stroke="#e1e0d9"/><text x="${left-6}" y="${y+4}" font-size="11" fill="#52514e" text-anchor="end">${t}</text>`});
+  if(yLabel) s+=`<text transform="translate(12 ${top+ph/2}) rotate(-90)" font-size="11" fill="#52514e" text-anchor="middle">${esc(yLabel)}</text>`;
+  cols.forEach((c,i)=>{
+    const x=left+i*slot+(slot-bw)/2;let y=top+ph;const segs=c.segs.filter(g=>g.v>0);
+    segs.forEach((g,j)=>{const last=j===segs.length-1;const hh=sy(g.v);const dh=last?hh:Math.max(0,hh-2);
+      s+=`<path d="${last?roundedBar(x,y-hh,bw,hh,'t'):`M${x},${y-dh}h${bw}v${dh}h${-bw}Z`}" fill="${g.color}" data-tip="${esc(g.tip)}"/>`;y-=hh});
+    s+=`<text x="${x+bw/2}" y="${y-6}" font-size="12" font-weight="600" fill="#0b0b0b" text-anchor="middle">${tot[i]}</text>`;
+    const lines=String(c.label).split('\n');
+    lines.forEach((ln,k)=>s+=`<text x="${x+bw/2}" y="${top+ph+16+k*13}" font-size="11.5" fill="${k?'#52514e':'#0b0b0b'}" text-anchor="middle">${esc(ln)}</text>`);
+  });
+  s+=`<line x1="${left}" x2="${width-right}" y1="${top+ph}" y2="${top+ph}" stroke="#c3c2b7"/>`;
+  return svgWrap(width,height,s,title);
+}
+/* matriks 5x5 likelihood x impact */
+const MX_COL=v=>v>=15?'#ff5a5a':v>=10?'#ffd24d':v>=5?'#ffff00':'#2eff8e';
+const MX_LEG=[['#2eff8e','L×I 1–4'],['#ffff00','L×I 5–9'],['#ffd24d','L×I 10–12'],['#ff5a5a','L×I 15–25']];
+function matrixCells(recs,rk){
+  const m={};recs.forEach(r=>{(m[r.L+'_'+r.I]??=[]).push(r)});
+  const cells=Object.values(m).map(items=>{items.sort((a,b)=>calc(b).score-calc(a).score);const ps=uniq(items.map(r=>rk[r.id]).filter(p=>p<=3)).sort();
+    return {L:items[0].L,I:items[0].I,items,max:calc(items[0]).score,best:Math.min(...items.map(r=>rk[r.id]||999)),ps}});
+  cells.sort((a,b)=>a.best-b.best||b.max-a.max||b.L*b.I-a.L*a.I||b.items.length-a.items.length);
+  cells.forEach((c,i)=>c.no=i+1);return cells;
+}
+function matrixKeyTable(recs,rk){
+  const cells=matrixCells(recs,rk);if(!cells.length)return '';
+  return `<div class="table-wrap" style="margin-top:10px;max-height:260px"><table class="dt"><thead><tr><th class="nosort num">Titik</th><th class="nosort num">L × I</th><th class="nosort num">Jumlah risiko</th><th class="nosort num">Skor ICRA tertinggi</th><th class="nosort">Risiko pada titik ini</th></tr></thead><tbody>${cells.map(c=>`<tr><td class="num"><span class="rk-top" style="background:${c.ps.length?'#b42323':'#1f2937'};border-radius:99px">${c.no}</span></td><td class="num" style="white-space:nowrap">${c.L} × ${c.I}</td><td class="num">${c.items.length}</td><td class="num"><b>${c.max}</b></td><td class="small">${c.items.slice(0,3).map(r=>esc(r.masalah)+(rk[r.id]<=3?` <b style="color:#b42323">(P${rk[r.id]})</b>`:'')).join('; ')}${c.items.length>3?` <span class="muted">+${c.items.length-3} lainnya</span>`:''}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function matrixChart(recs,{title,rk={}}){
+  const W=660,H=420,gL=104,gR=560,gT=22,gB=332,cw=(gR-gL)/5,ch=(gB-gT)/5;
+  const X=l=>gL+(l-1)*cw, Y=i=>gT+(5-i)*ch; // likelihood -> kolom, impact -> baris (5 di atas)
+  const cnt={};matrixCells(recs,rk).forEach(c=>cnt[c.L+'_'+c.I]=c);
+  const IMS={1:'Minimal',2:'Moderate',3:'Prolonged',4:'Serious',5:'Catastrophic'};
+  let s='',ov='';
+  for(let i=5;i>=1;i--)for(let l=1;l<=5;l++){
+    const x=X(l),y=Y(i),v=l*i,cell=cnt[l+'_'+i],items=cell?cell.items:[];
+    const tipTxt=`<b>${cell?'Titik '+cell.no+' · ':''}Likelihood ${l} × Impact ${i} = ${v}</b><br>`+(items.length?`${items.length} risiko:<br>`+items.slice(0,10).map(r=>`• ${esc(trunc(r.masalah,55))} — skor ICRA <b>${calc(r).score}</b> (${calc(r).level})${rk[r.id]<=3?' · <b>Prioritas '+rk[r.id]+'</b>':''}`).join('<br>')+(items.length>10?'<br>…':''):'Tidak ada risiko');
+    s+=`<rect x="${x}" y="${y}" width="${cw}" height="${ch}" fill="${MX_COL(v)}" data-tip="${esc(tipTxt)}"/>`;
+    s+=`<text x="${x+5}" y="${y+21}" font-size="15" fill="#1f3b5c" pointer-events="none">${v}</text>`;
+    if(items.length){const cx=x+cw/2-12,cy=y+ch/2+4;const ps=cell.ps;
+      ov+=`<circle cx="${cx}" cy="${cy}" r="15" fill="${ps.length?'#b42323':'#1f2937'}" stroke="#fff" stroke-width="2" pointer-events="none"/><text x="${cx}" y="${cy+5}" font-size="14" font-weight="700" fill="#fff" text-anchor="middle" pointer-events="none">${cell.no}</text>`;
+      if(ps.length)ov+=`<text x="${cx+19}" y="${cy-1}" font-size="11" font-weight="700" fill="#7a1010" pointer-events="none">${ps.map(p=>'P'+p).join(',')}</text>`;
+      ov+=`<text x="${cx+19}" y="${cy+(ps.length?12:4)}" font-size="10" fill="#1f2937" pointer-events="none">${items.length} risiko</text>`;}
+  }
+  // garis putus-putus antar sel (lingkaran digambar setelah ini) + bingkai tebal
+  for(let k=1;k<5;k++){s+=`<line x1="${gL+k*cw}" x2="${gL+k*cw}" y1="${gT}" y2="${gB}" stroke="#555" stroke-width="1" stroke-dasharray="1.5 2.5"/><line x1="${gL}" x2="${gR}" y1="${gT+k*ch}" y2="${gT+k*ch}" stroke="#555" stroke-width="1" stroke-dasharray="1.5 2.5"/>`}
+  s+=`<rect x="${gL}" y="${gT}" width="${gR-gL}" height="${gB-gT}" fill="none" stroke="#000" stroke-width="2.5"/>`;
+  s+=ov;
+  // garis toleransi risiko
+  const tol=`M${X(2)},4 V${Y(4)} H${X(3)} V${Y(3)} H${X(4)} V${Y(2)} H${X(5)} V${Y(1)} H${W-4}`;
+  s+=`<path d="${tol}" fill="none" stroke="#e00000" stroke-width="2.2" stroke-dasharray="9 5" pointer-events="none"/>`;
+  s+=`<text font-size="11" fill="#e00000"><tspan x="${gR+8}" y="${Y(1)+16}">Garis</tspan><tspan x="${gR+8}" y="${Y(1)+29}">Toleransi</tspan><tspan x="${gR+8}" y="${Y(1)+42}">Risiko</tspan></text>`;
+  // label sumbu
+  for(let i=1;i<=5;i++){const cy=Y(i)+ch/2;s+=`<text x="${gL-30}" y="${cy+4}" font-size="12" fill="#0b0b0b" text-anchor="middle">${i}</text><text transform="translate(${gL-12} ${cy}) rotate(-90)" font-size="9.5" fill="#0b0b0b" text-anchor="middle">(${IMS[i]})</text>`}
+  for(let l=1;l<=5;l++){const cx=X(l)+cw/2;s+=`<text x="${cx}" y="${gB+15}" font-size="12" fill="#0b0b0b" text-anchor="middle">${l}</text><text x="${cx}" y="${gB+29}" font-size="11.5" fill="#0b0b0b" text-anchor="middle">(${esc(SC.L.lbl[l])})</text>`}
+  s+=`<rect x="4" y="${gT}" width="24" height="${gB-gT}" fill="#fff" stroke="#000" stroke-width="1.5"/><text transform="translate(21 ${(gT+gB)/2}) rotate(-90)" font-size="13" font-weight="800" fill="#000" text-anchor="middle">IMPACT / CONSEQUENCES</text>`;
+  s+=`<rect x="${gL}" y="${gB+40}" width="${gR-gL}" height="22" fill="#fff" stroke="#000" stroke-width="1.5"/><text x="${(gL+gR)/2}" y="${gB+56}" font-size="13" font-weight="800" fill="#000" text-anchor="middle">PROBABILITY / LIKELIHOOD</text>`;
+  return svgWrap(W,H,s,title);
+}
+async function svgToPng(svgEl,name,withLegend){
+  const vb0=svgEl.viewBox.baseVal;withLegend=withLegend&&withLegend.length?withLegend:null;const head=withLegend?58:36;
+  let leg='';if(withLegend){let x=0;withLegend.forEach(([col,t])=>{leg+=`<rect x="${x}" y="0" width="10" height="10" rx="2" fill="${col}"/><text x="${x+15}" y="9.5" font-size="11.5" fill="#52514e">${esc(t)}</text>`;x+=t.length*6.4+34})}
+  const sub=esc(DB.S.hospital)+' · '+esc(UI.dash.unit||'Semua unit')+' · '+(UI.dash.tahun===''?'Semua tahun':'Tahun '+UI.dash.tahun);
+  const wrapped=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vb0.width} ${vb0.height+head+6}" font-family="${FONT}"><rect width="100%" height="100%" fill="#fff"/><text x="10" y="18" font-size="15" font-weight="700" fill="#0b0b0b">${esc(name)}</text><text x="${vb0.width-10}" y="18" font-size="11" fill="#52514e" text-anchor="end">${sub}</text>${withLegend?`<g transform="translate(10 34)">${leg}</g>`:''}<g transform="translate(0 ${head+6})">${svgEl.innerHTML}</g></svg>`;
+  const xml=wrapped;const vb={width:vb0.width,height:vb0.height+head+6};const scale=2.5;
+  const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
+  await img.decode();
+  const c=document.createElement('canvas');c.width=vb.width*scale;c.height=vb.height*scale;
+  const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);
+  c.toBlob(b=>download(b,name.replace(/[^\w\-]+/g,'_')+'.png'),'image/png');
+}
+function chartCard(id,title,sub,body,legend=''){
+  return `<div class="card chart" id="${id}"><div class="card-head"><div><h3>${esc(title)}</h3><p class="sub">${sub}</p></div><button class="btn sm ghost no-print" data-png="${id}" title="Unduh gambar PNG untuk presentasi">⬇ PNG</button></div>${legend}${body}</div>`;
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-png]');if(!b)return;const card=$('#'+b.dataset.png);const svg=$('svg',card);if(svg)svgToPng(svg,$('h3',card).textContent,$$('.legend .chip',card).map(c=>[c.querySelector('i').style.background,c.textContent.trim()]))});
+const levelLegend = (ks=LEVELS.map(l=>l.k)) => `<div class="legend">${ks.map(k=>`<span class="chip" style="font-weight:500"><i style="background:${LV[k].color}"></i>${k} (${LV[k].range})</span>`).join('')}</div>`;
+
+/* ===================== VIEW: DASHBOARD ===================== */
+function filterOpts(sel,list,allLabel){return (allLabel!==undefined?`<option value="">${allLabel}</option>`:'')+list.map(v=>`<option ${String(v)===String(sel)?'selected':''}>${esc(v)}</option>`).join('')}
+function viewDashboard(el){
+  if(UI.dash.unit===null) UI.dash.unit=units().includes('Seluruh Departemen')?'Seluruh Departemen':'';
+  if(UI.dash.unit&&!units().includes(UI.dash.unit)) UI.dash.unit='';
+  const ys=years(); if(UI.dash.tahun===null||(UI.dash.tahun!==''&&!ys.includes(+UI.dash.tahun))) UI.dash.tahun=ys[0]??'';
+  const recs=DB.records.filter(r=>(UI.dash.tahun===''||+r.tahun===+UI.dash.tahun)&&(!UI.dash.unit||r.unit===UI.dash.unit));
+  const rk=denseRank(recs); const S=DB.S;
+  const byLv=Object.fromEntries(LEVELS.map(l=>[l.k,0]));recs.forEach(r=>byLv[calc(r).level]++);
+  const maxScore=recs.reduce((m,r)=>Math.max(m,calc(r).score),0);
+  const prioPanel=[1,2,3].map(p=>{const items=recs.filter(r=>rk[r.id]===p);if(!items.length)return `<div class="prio"><div class="prio-top"><span class="prio-badge">PRIORITAS ${p}</span></div><div class="muted small">—</div></div>`;const c=calc(items[0]);
+    return `<div class="prio"><div class="prio-top"><span class="prio-badge">PRIORITAS ${p}</span><div class="prio-score">${c.score}<small>skor ICRA</small></div></div>${items.map(r=>`<div class="prio-item"><b>${esc(r.masalah)}</b><div class="prio-meta">${esc(r.subgrup||r.grup||'')}${UI.dash.unit?'':' · '+esc(r.unit)}</div><div class="prio-meta">L ${r.L} (${SC.L.lbl[r.L]}) × I ${r.I} (${SC.I.lbl[r.I]}) × S ${r.S} (${SC.S.lbl[r.S]}) = <b style="display:inline;font-size:12px">${calc(r).score}</b> · ${chipHTML(calc(r).level)}</div></div>`).join('')}</div>`}).join('');
+  const scope=`${UI.dash.unit||'Semua unit'} · ${UI.dash.tahun===''?'Semua tahun':'Tahun '+UI.dash.tahun}`;
+
+  // top 10
+  const top=[...recs].sort((a,b)=>calc(b).score-calc(a).score||b.L*b.I-a.L*a.I).slice(0,10);
+  const topRows=top.map(r=>{const c=calc(r);const p=rk[r.id];return {label:r.masalah,total:c.score,totalLabel:p<=3?`${c.score}  · Prioritas ${p}`:c.score,
+    segs:[{v:c.score,color:p<=3?PRIO_RED:PRIO_OTHER,tip:`<b>${esc(r.masalah)}</b><br>${esc(r.unit)} · ${r.tahun}<br>L ${r.L} × I ${r.I} × S ${r.S} = <b>${c.score}</b><br>Tingkat: ${c.level} · Prioritas ${rk[r.id]}`}]}});
+  // per grup stacked
+  const gm={};recs.forEach(r=>{const g=r.grup||'(Tanpa grup)';(gm[g]??={n:0,lv:{}}).n++;const l=calc(r).level;gm[g].lv[l]=(gm[g].lv[l]||0)+1});
+  const grRows=Object.entries(gm).sort((a,b)=>b[1].n-a[1].n).map(([g,o])=>({label:g,total:o.n,segs:LEVELS.map(l=>({v:o.lv[l.k]||0,color:l.color,tip:`<b>${esc(g)}</b><br>${l.k}: ${o.lv[l.k]||0} risiko`}))}));
+  // current system
+  const csCols=[1,2,3,4,5].map(v=>{const n=recs.filter(r=>r.S===v).length;return {label:`${v}\n${SC.S.lbl[v]}`,segs:[{v:n,color:'#2a78d6',tip:`<b>${v} · ${SC.S.lbl[v]}</b><br>${esc(SC.S.desc[v])}<br>${n} risiko`}]}});
+  // tren tahun
+  const trendRecs=DB.records.filter(r=>!UI.dash.unit||r.unit===UI.dash.unit);
+  const tys=uniq(trendRecs.map(r=>+r.tahun)).sort((a,b)=>a-b);
+  const trCols=tys.map(y=>{const rr=trendRecs.filter(r=>+r.tahun===y);const c={};rr.forEach(r=>{const l=calc(r).level;c[l]=(c[l]||0)+1});
+    return {label:String(y),segs:[...LEVELS].reverse().map(l=>({v:c[l.k]||0,color:l.color,tip:`<b>Tahun ${y}</b><br>${l.k}: ${c[l.k]||0} risiko`}))}});
+
+  el.innerHTML=`
+  <div class="print-head"><h2 style="margin:0">Dashboard Infection Control Risk Assessment (ICRA)</h2><div>${esc(S.hospital)} · ${esc(scope)} · dicetak ${fmtDate(new Date())}</div></div>
+  <div class="page-head"><div><h1>Dashboard ICRA</h1><p>${esc(S.hospital)} · ${esc(scope)}</p></div>
+    <div class="row no-print">
+      <label class="f">Tahun<select id="fTahun">${filterOpts(UI.dash.tahun,ys,'Semua tahun')}</select></label>
+      <label class="f">Unit / Area<select id="fUnit">${filterOpts(UI.dash.unit,units(),'Semua unit')}</select></label>
+      ${MODE==='main'&&!SIMPLE&&DB.settings.excelName&&FSA?`<button class="btn" id="btnSyncX" style="align-self:flex-end" title="File: ${esc(DB.settings.excelName)}${DB.settings.excelSync?' · terakhir '+fmtDate(DB.settings.excelSync.at):''}">🔄 Sinkron Excel</button>`:''}
+      <button class="btn" id="btnPrint" style="align-self:flex-end">🖨 Cetak / PDF</button>
+    </div></div>
+  ${sourceBanner()}${backupBanner()}
+  ${!DB.records.length?`<div class="card empty">Belum ada data. Mulai dari menu <b>Input Data</b> atau impor file Excel di menu <b>Data &amp; Excel</b>.</div>`:`
+  <div class="card prio-wrap"><div class="card-head"><div><h3>3 Prioritas Utama ICRA</h3><p class="sub">Ditentukan dari skor ICRA tertinggi (Likelihood × Impact × Current System) · ${esc(scope)}${UI.dash.unit?'':' · <b>pilih satu unit agar prioritas sesuai lembar ICRA unit tersebut</b>'} · skor sama = prioritas sama</p></div></div><div class="grid g3">${prioPanel}</div></div>
+  <div class="grid g-kpi" style="margin-bottom:14px">
+    <div class="kpi"><div class="lbl">Total risiko dinilai</div><div class="val">${recs.length}</div><div class="note">skor tertinggi: ${maxScore}</div></div>
+    ${LEVELS.map(l=>`<div class="kpi"><div class="lbl"><i style="width:10px;height:10px;border-radius:3px;background:${l.color};display:inline-block"></i>${l.k}</div><div class="val">${byLv[l.k]}</div><div class="note">skor ${l.range} · ${recs.length?Math.round(byLv[l.k]/recs.length*100):0}%</div></div>`).join('')}
+  </div>
+  <div class="grid g2">
+    ${chartCard('cTop','Skor ICRA – 10 Risiko Tertinggi','Angka di ujung batang = skor ICRA (L×I×S); merah = 3 prioritas utama',hbarChart(topRows,{title:'Skor ICRA – 10 Risiko Tertinggi',labelW:250,axisLabel:'Skor ICRA'}),`<div class="legend"><span class="chip" style="font-weight:500"><i style="background:${PRIO_RED}"></i>Prioritas 1–3</span><span class="chip" style="font-weight:500"><i style="background:${PRIO_OTHER}"></i>Prioritas berikutnya</span></div>`)}
+    ${chartCard('cMatrix','Matriks Risiko (Probability × Impact)','Angka di pojok sel = L×I · nomor titik berurutan dari skor ICRA tertinggi (merah = berisi prioritas 1–3) · arahkan kursor untuk detail',matrixChart(recs,{title:'Matriks Risiko',rk})+matrixKeyTable(recs,rk),`<div class="legend">${MX_LEG.map(([c,l])=>`<span class="chip" style="font-weight:500"><i style="background:${c};outline:1px solid #999"></i>${l}</span>`).join('')}<span class="chip" style="font-weight:500"><i style="background:#e00000;height:3px"></i>Garis toleransi risiko</span></div>`)}
+    ${chartCard('cGrup','Jumlah Risiko per Grup Risiko','Dipecah menurut tingkat risiko',hbarChart(grRows,{title:'Jumlah Risiko per Grup Risiko',labelW:270,axisLabel:'Jumlah risiko'}),levelLegend())}
+    ${chartCard('cSys','Kesiapan Sistem (Current System)','Jumlah risiko per tingkat kesiapan sistem yang ada',vbarChart(csCols,{title:'Kesiapan Sistem (Current System)',yLabel:'Jumlah risiko'}))}
+    ${chartCard('cTrend','Tren Tingkat Risiko per Tahun',`${esc(UI.dash.unit||'Semua unit')} — untuk melihat perubahan dari tahun ke tahun`,vbarChart(trCols,{title:'Tren Tingkat Risiko per Tahun',yLabel:'Jumlah risiko'}),levelLegend())}
+    <div class="card"><div class="card-head"><div><h3>Tabel Prioritas</h3><p class="sub">Urutan skor ICRA tertinggi pada filter ini (skor sama = prioritas sama)</p></div></div>
+      <div class="table-wrap" style="max-height:420px"><table class="dt"><thead><tr><th class="nosort num">Prio</th><th class="nosort">Potensi risiko</th><th class="nosort">Unit</th><th class="nosort num">Skor</th><th class="nosort">Tingkat</th></tr></thead><tbody>
+      ${[...recs].sort((a,b)=>rk[a.id]-rk[b.id]||calc(b).score-calc(a).score).slice(0,25).map(r=>`<tr><td class="num">${rkCell(rk[r.id])}</td><td>${esc(r.masalah)}<div class="small muted">${esc(r.subgrup||r.grup)}</div></td><td class="small">${esc(r.unit)}</td><td class="num"><b>${calc(r).score}</b></td><td>${chipHTML(calc(r).level)}</td></tr>`).join('')}
+      </tbody></table></div></div>
+  </div>`}`;
+  $('#fTahun')&&($('#fTahun').onchange=e=>{UI.dash.tahun=e.target.value;render()});
+  $('#fUnit')&&($('#fUnit').onchange=e=>{UI.dash.unit=e.target.value;render()});
+  $('#btnPrint')&&($('#btnPrint').onclick=()=>window.print());
+  $('#btnSyncX')&&($('#btnSyncX').onclick=()=>syncExcel(true));
+}
+
+/* ===================== VIEW: INPUT ===================== */
+function scaleHTML(key,val){
+  return `<div class="scale" role="radiogroup" aria-label="${SC[key].name}">${[5,4,3,2,1].map(v=>`<input type="radio" name="${key}" id="${key}${v}" value="${v}" ${+val===v?'checked':''}><label for="${key}${v}" title="${esc(SC[key].desc[v])}"><b>${v}</b>${esc(SC[key].lbl[v])}</label>`).join('')}</div><div class="scale-hint" id="${key}hint"></div>`;
+}
+function suggestionsFor(unit){
+  const s=(SEED&&SEED.suggestions&&SEED.suggestions[unit])||[];
+  return uniq([...DB.records.filter(r=>r.unit===unit).map(r=>r.masalah),...s.map(x=>x.masalah)]);
+}
+function masterSources(){
+  const src=[];const pick=r=>({grup:r.grup||'',subgrup:r.subgrup||'',masalah:r.masalah});
+  if(SEED){
+    if(SEED.master&&SEED.master.items.length)src.push({k:'Sheet '+SEED.master.label,items:SEED.master.items.map(pick)});
+    const a=SEED.records.filter(r=>r.unit==='Seluruh Departemen').map(pick);if(a.length)src.push({k:'Sheet ICRA ALL DEP 26 (Seluruh Departemen)',items:a});
+    const b=SEED.records.filter(r=>r.unit==='RS SHTB (Prioritisasi)').map(pick);if(b.length)src.push({k:'Sheet ICRA SHTB 26',items:b});
+    Object.entries(SEED.suggestions||{}).forEach(([u,list])=>{if(list.length)src.push({k:'Sheet ICRA '+u,items:list.map(x=>({grup:x.grup||'',subgrup:u,masalah:x.masalah}))})});
+  }
+  const known=new Set(src.flatMap(s=>s.items.map(i=>norm(i.masalah))));const seen=new Set();
+  const own=[...DB.records].sort((a,b)=>(a.seq||0)-(b.seq||0)).filter(r=>{const k=norm(r.masalah);if(known.has(k)||seen.has(k))return false;seen.add(k);return true}).map(pick);
+  if(own.length)src.push({k:'Ketikan manual yang sudah tersimpan',items:own});
+  return src;
+}
+function comboHTML(key,main,extra,value,label,ph,allowNew=true){
+  const all=uniq([...main,...extra]);const v=String(value||'');const inList=!v||all.includes(v);
+  const opt=x=>`<option value="${esc(x)}" ${x===v?'selected':''}>${esc(x)}</option>`;
+  const ex=extra.filter(x=>!main.includes(x));
+  return `<label class="f">${label}<select data-combo="${key}"><option value="" ${!v?'selected':''}>— pilih —</option>${main.map(opt).join('')}${ex.length?`<optgroup label="Lainnya (sudah ada di data)">${ex.map(opt).join('')}</optgroup>`:''}${allowNew?`<option value="${NEW_OPT}" ${inList?'':'selected'}>➕ Tambah baru (ketik manual)…</option>`:''}</select>
+    <input type="text" name="${key}" value="${esc(v)}" placeholder="${esc(ph)}" class="${inList?'hidden':''}" style="margin-top:6px"></label>`;
+}
+function setCombo(f,key,val){
+  const sel=$(`select[data-combo="${key}"]`,f);const inp=f[key];val=String(val||'');inp.value=val;if(!sel)return;
+  if(val&&![...sel.options].some(o=>o.value===val)){const o=document.createElement('option');o.value=val;o.textContent=val;sel.insertBefore(o,sel.querySelector(`option[value="${NEW_OPT}"]`))}
+  sel.value=val;inp.classList.add('hidden');
+}
+const DRAFT_FIELDS=['tahun','unit','grup','subgrup','masalah','tujuan','indikator','rencana','pic','target','bukti','ket'];
+let draftTimer=null;
+function saveDraft(f){
+  const data={};DRAFT_FIELDS.forEach(k=>data[k]=f[k]?f[k].value:'');['L','I','S'].forEach(k=>data[k]=+f[k].value||null);
+  const empty=!data.unit&&!data.grup&&!data.subgrup&&!data.masalah&&!data.L&&!data.I&&!data.S&&!data.rencana&&!data.ket;
+  UI.input.draft=empty&&!UI.input.editId?null:{editId:UI.input.editId||null,data,at:new Date().toISOString()};
+  clearTimeout(draftTimer);draftTimer=setTimeout(()=>DB.setSetting('draft',UI.input.draft),300);
+}
+function clearDraft(){UI.input.draft=null;clearTimeout(draftTimer);DB.setSetting('draft',null)}
+function openGuideModal(){
+  $('#modal').innerHTML=`<div class="row" style="justify-content:space-between;margin-bottom:8px"><h2 style="margin:0">Panduan Penetapan Skor</h2><button class="btn" id="gClose">✕ Tutup &amp; lanjut input</button></div>${guideHTML()}<div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" id="gClose2">Kembali ke form input</button></div>`;
+  $('#modalBg').style.display='flex';const close=()=>$('#modalBg').style.display='none';$('#gClose').onclick=close;$('#gClose2').onclick=close;
+}
+$('#modalBg').addEventListener('click',e=>{if(e.target.id==='modalBg'&&$('#gClose'))$('#modalBg').style.display='none'});
+function viewInput(el){
+  const S=DB.S; const ed=UI.input.editId?DB.records.find(r=>r.id===UI.input.editId):null;
+  if(UI.input.editId&&!ed) UI.input.editId=null;
+  const dr=UI.input.draft!==undefined?UI.input.draft:DB.settings.draft;
+  const useDraft=!!(dr&&dr.data&&(dr.editId||null)===(UI.input.editId||null));
+  const base=ed||{tahun:UI.input.tahun||S.year,unit:UI.input.unit||'',grup:'',subgrup:'',masalah:'',L:null,I:null,S:null,status:'Belum',tujuan:'',indikator:'',rencana:'',pic:'',target:'',bukti:'',ket:''};
+  const r=useDraft?{...base,...dr.data}:base;
+  const extraUnits=units().filter(u=>!DEFAULT_UNITS.includes(u));
+  const extraGrup=uniq(DB.records.map(x=>x.grup)).filter(g=>!PPI_GROUPS.includes(g)).sort((a,b)=>a.localeCompare(b));
+  el.innerHTML=`
+  <div class="page-head"><div><h1>${ed?'Edit Data Risiko':'Input Data Risiko'}</h1><p>Isi penilaian satu potensi risiko. Skor dan tingkat risiko dihitung otomatis.</p></div>
+  <div class="row"><button class="btn" id="btnGuide" type="button">📖 Lihat panduan skor</button>${ed?`<button class="btn" id="btnCancel">✕ Batal edit</button>`:''}</div></div>
+  ${useDraft?`<div class="banner" id="draftBanner"><span>📝 Isian yang belum disimpan dipulihkan (draf ${fmtDate(dr.at)} ${dr.at?new Date(dr.at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}):''}). Lanjutkan lalu klik <b>Simpan data</b>.</span><button class="btn sm" id="btnDropDraft" type="button">Buang draf</button></div>`:''}
+  <div class="grid" style="grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);align-items:start" id="inGrid">
+  <form class="card" id="frm" autocomplete="off">
+    <div class="form-grid">
+      <label class="f">Tahun *<input type="number" name="tahun" min="2000" max="2100" required value="${esc(r.tahun)}"></label>
+      <div style="grid-column:span 3">${MODE==='server'&&ME&&ME.role==='departemen'?comboHTML('unit',ME.units,[],ME.units.includes(r.unit)?r.unit:ME.units[0],'Unit / Area penilaian *','',false):comboHTML('unit',DEFAULT_UNITS,extraUnits,r.unit,'Unit / Area penilaian *','Ketik nama unit baru')}</div>
+      <div class="span2">${comboHTML('grup',PPI_GROUPS,extraGrup,r.grup,'Grup risiko (kategori)','Ketik nama grup risiko baru')}</div>
+      <div class="span2">${comboHTML('subgrup',uniq([...masterSources().flatMap(s=>s.items.map(i=>i.subgrup)),...DB.records.map(x=>x.subgrup)].map(x=>String(x||'').trim())).sort((a,b)=>a.localeCompare(b)),[],r.subgrup,'Sub grup (sub kategori)','Ketik nama sub grup baru')}</div>
+      <div class="span4"><label class="f">Potensial risiko / masalah * <span style="font-weight:400" class="muted">— pilih dari daftar (✓ = sudah diinput untuk unit &amp; tahun ini) atau tambah baru</span>
+        <select data-combo="masalah" id="mSel"></select>
+        <input type="text" name="masalah" list="dlMasalah" value="${esc(r.masalah)}" placeholder="Ketik potensial risiko / masalah baru" class="hidden" style="margin-top:6px"></label></div>
+      <div class="span4"><label class="f">${SC.L.name} *</label>${scaleHTML('L',r.L)}</div>
+      <div class="span4"><label class="f">${SC.I.name} *</label>${scaleHTML('I',r.I)}</div>
+      <div class="span4"><label class="f">${SC.S.name} (sistem yang ada) *</label>${scaleHTML('S',r.S)}</div>
+      <div class="span4 score-box" id="scoreBox"></div>
+      <details class="span4" ${ed&&(r.rencana||r.tujuan||r.pic)?'open':''}><summary style="cursor:pointer;font-weight:600;color:var(--brand)">Rencana tindak lanjut (Risk Priority) – opsional</summary>
+        <div class="form-grid" style="margin-top:10px">
+          <label class="f span2">Tujuan<textarea name="tujuan" rows="2">${esc(r.tujuan)}</textarea></label>
+          <label class="f span2">Obyektif yang dapat diukur / indikator<textarea name="indikator" rows="2">${esc(r.indikator)}</textarea></label>
+          <label class="f span4">Strategi / rencana tindak lanjut<textarea name="rencana" rows="3">${esc(r.rencana)}</textarea></label>
+          <label class="f">PIC<input type="text" name="pic" value="${esc(r.pic)}"></label>
+          <label class="f">Waktu / target<input type="text" name="target" value="${esc(r.target)}" placeholder="mis. Triwulan II 2026"></label>
+          <label class="f span2">Bukti evaluasi<input type="text" name="bukti" value="${esc(r.bukti)}"></label>
+        </div></details>
+      <label class="f span4">Keterangan<textarea name="ket" rows="2">${esc(r.ket)}</textarea></label>
+    </div>
+    <div class="row" style="margin-top:14px;justify-content:flex-end">
+      ${ed?`<button type="button" class="btn danger" id="btnDel">Hapus</button>`:`<label class="small muted" style="margin-right:auto"><input type="checkbox" id="keepCtx" checked> pertahankan tahun, unit &amp; grup untuk input berikutnya</label>`}
+      <button type="reset" class="btn">Kosongkan</button>
+      <button type="submit" class="btn primary">💾 ${ed?'Simpan perubahan':'Simpan data'}</button>
+    </div>
+    <datalist id="dlSub"></datalist><datalist id="dlMasalah"></datalist>
+  </form>
+  <div class="card" id="sideList"></div>
+  </div>`;
+  if(innerWidth<1100) $('#inGrid').style.gridTemplateColumns='1fr';
+  const f=$('#frm');
+  const upd=()=>{
+    const L=+f.L.value,I=+f.I.value,Sv=+f.S.value;
+    ['L','I','S'].forEach(k=>{const v=+f[k].value;$('#'+k+'hint').textContent=v?`${v} – ${SC[k].desc[v]}`:''});
+    if(L&&I&&Sv){const c=calc({L,I,S:Sv});const lv=LV[c.level];
+      $('#scoreBox').innerHTML=`<div><div class="cap">L × I</div><div class="big">${c.li}</div></div><div><div class="cap">Tingkat risiko</div><div style="margin-top:6px">${chipHTML(c.level)}</div></div><div><div class="cap">Skor ICRA (L×I×S)</div><div class="big">${c.score}</div></div><div style="flex:1;min-width:200px" class="small muted">${esc(lv.act)}</div>`;
+    } else $('#scoreBox').innerHTML='<span class="muted">Pilih nilai Likelihood, Impact dan Current System untuk melihat skor.</span>';
+  };
+  const updLists=()=>{
+    $('#dlSub').innerHTML=uniq(DB.records.filter(x=>!f.grup.value||x.grup===f.grup.value).map(x=>x.subgrup)).map(u=>`<option value="${esc(u)}">`).join('');
+    $('#dlMasalah').innerHTML=uniq([...suggestionsFor(f.unit.value),...masterSources().flatMap(s=>s.items.map(i=>i.masalah))]).map(u=>`<option value="${esc(u)}">`).join('');
+    renderSideList(f.tahun.value,f.unit.value);
+  };
+  f.addEventListener('change',e=>{if(['L','I','S'].includes(e.target.name))upd();else updLists()});
+  f.unit.addEventListener('input',updLists);f.tahun.addEventListener('input',updLists);
+  f.masalah.addEventListener('change',()=>{ // isi grup dari data sebelumnya bila ada
+    if(f.grup.value) return;
+    const prev=DB.records.find(x=>norm(x.masalah)===norm(f.masalah.value));
+    const sg=(SEED?.suggestions?.[f.unit.value]||[]).find(x=>norm(x.masalah)===norm(f.masalah.value));
+    if(prev){setCombo(f,'grup',prev.grup);setCombo(f,'subgrup',prev.subgrup)}else if(sg){setCombo(f,'grup',sg.grup)}
+  });
+  $$('select[data-combo]',f).forEach(sel=>sel.addEventListener('change',()=>{const inp=f[sel.dataset.combo];
+    if(sel.value===NEW_OPT){inp.value='';inp.classList.remove('hidden');inp.focus()}else{inp.value=sel.value;inp.classList.add('hidden')}
+    inp.dispatchEvent(new Event('input',{bubbles:true}));inp.dispatchEvent(new Event('change',{bubbles:true}))}));
+  const ITEMS=[];const IMAP=new Map();masterSources().forEach(s=>s.items.forEach(it=>{const k=norm(it.masalah);if(!IMAP.has(k)){IMAP.set(k,it);ITEMS.push(it)}}));
+  const fillMasalah=()=>{const sel=$('#mSel');const cur=f.masalah.value;
+    const done=new Set(DB.records.filter(x=>+x.tahun===+f.tahun.value&&x.unit===f.unit.value).map(x=>norm(x.masalah)));
+    const groups={};const order=[];ITEMS.forEach(it=>{const g=it.grup||'Lainnya';if(!groups[g]){groups[g]=[];order.push(g)}groups[g].push(it)});
+    const known=!cur||IMAP.has(norm(cur));
+    sel.innerHTML=`<option value="">— pilih potensial risiko (${ITEMS.length}) —</option>`+order.map(g=>`<optgroup label="${esc(g)}">${groups[g].map(it=>`<option value="${esc(it.masalah)}" ${cur&&norm(it.masalah)===norm(cur)?'selected':''}>${done.has(norm(it.masalah))?'✓ ':''}${esc(it.subgrup?it.subgrup+' · ':'')}${esc(it.masalah)}</option>`).join('')}</optgroup>`).join('')+`<option value="${NEW_OPT}" ${known?'':'selected'}>➕ Tambah baru (ketik manual)…</option>`;
+    f.masalah.classList.toggle('hidden',known);
+  };
+  fillMasalah();
+  f.unit.addEventListener('change',fillMasalah);f.tahun.addEventListener('change',fillMasalah);
+  $('#mSel').addEventListener('change',e=>{const it=IMAP.get(norm(e.target.value));if(!it)return;
+    setCombo(f,'grup',it.grup);setCombo(f,'subgrup',it.subgrup);
+    const dup=DB.records.find(x=>+x.tahun===+f.tahun.value&&x.unit===f.unit.value&&norm(x.masalah)===norm(it.masalah));
+    if(dup&&!ed)toast('Catatan: masalah ini sudah ada untuk unit & tahun ini (✓)',3500)});
+  f.addEventListener('reset',()=>setTimeout(()=>{clearDraft();$('#draftBanner')&&$('#draftBanner').remove();$$('select[data-combo]',f).forEach(s=>{const i=f[s.dataset.combo];s.value=[...s.options].some(o=>o.value===i.value)?i.value:(i.value?NEW_OPT:'');i.classList.toggle('hidden',s.value!==NEW_OPT)});upd()},0));
+  upd();updLists();
+  f.addEventListener('input',()=>saveDraft(f));f.addEventListener('change',()=>saveDraft(f));
+  $('#btnGuide').onclick=openGuideModal;
+  $('#btnDropDraft')&&($('#btnDropDraft').onclick=()=>{if(!confirm('Buang isian draf yang belum disimpan?'))return;clearDraft();render()});
+  $('#btnCancel')&&($('#btnCancel').onclick=()=>{clearDraft();UI.input.editId=null;render()});
+  $('#btnDel')&&($('#btnDel').onclick=async()=>{if(!confirm('Hapus data risiko ini?'))return;await DB.del([ed.id]);clearDraft();UI.input.editId=null;toast('Data dihapus');render()});
+  f.onsubmit=async e=>{
+    e.preventDefault();
+    const L=+f.L.value,I=+f.I.value,Sv=+f.S.value;
+    if(!f.unit.value.trim()){toast('Pilih unit atau ketik nama unit baru');$('select[data-combo=unit]',f).focus();return}
+    if(MODE==='server'&&!canEdit({unit:f.unit.value.trim()})){toast('Anda hanya dapat mengisi data unit: '+ME.units.join(', '));return}
+    if(!f.masalah.value.trim()){toast('Pilih potensial risiko atau ketik yang baru');$('#mSel').focus();return}
+    if(!L||!I||!Sv){toast('Lengkapi nilai Likelihood, Impact dan Current System');return}
+    const now=new Date().toISOString();
+    const rec=Object.assign(ed?{...ed}:{id:uid(),seq:maxSeq()+1,createdAt:now},{
+      tahun:+f.tahun.value,unit:f.unit.value.trim(),grup:f.grup.value.trim(),subgrup:f.subgrup.value.trim(),masalah:f.masalah.value.trim(),
+      L,I,S:Sv,status:(ed&&ed.status)||'Belum',tujuan:f.tujuan.value.trim(),indikator:f.indikator.value.trim(),rencana:f.rencana.value.trim(),
+      pic:f.pic.value.trim(),target:f.target.value.trim(),bukti:f.bukti.value.trim(),ket:f.ket.value.trim()});
+    if(!ed){const dup=DB.records.find(x=>+x.tahun===rec.tahun&&x.unit===rec.unit&&norm(x.masalah)===norm(rec.masalah));
+      if(dup&&!confirm('Masalah yang sama sudah ada untuk tahun & unit ini. Tetap simpan sebagai data baru?'))return;}
+    try{await DB.save(rec)}catch(err){alert('Gagal menyimpan: '+err.message);return}clearDraft();
+    toast(ed?'Perubahan disimpan':'Data tersimpan ✓  Skor '+calc(rec).score);
+    if(ed){UI.input.editId=null;render();return}
+    const keep=$('#keepCtx')?.checked;
+    UI.input.tahun=rec.tahun;UI.input.unit=rec.unit;
+    render();
+    if(keep){const f2=$('#frm');setCombo(f2,'grup',rec.grup);setCombo(f2,'subgrup',rec.subgrup);$('#mSel').focus()}
+  };
+}
+function renderSideList(tahun,unit){
+  const box=$('#sideList');if(!box)return;
+  const rk=ranks(DB.records);
+  const list=DB.records.filter(r=>+r.tahun===+tahun&&r.unit===unit).sort((a,b)=>rk[a.id]-rk[b.id]);
+  box.innerHTML=`<h3>Data ${esc(unit||'—')} · ${esc(tahun)}</h3><p class="sub">${list.length} risiko tersimpan · klik untuk mengedit</p>
+  ${list.length?`<div class="table-wrap" style="max-height:72vh"><table class="dt"><thead><tr><th class="nosort num">Prio</th><th class="nosort">Masalah</th><th class="nosort num">Skor</th></tr></thead><tbody>
+  ${list.map(r=>`<tr style="cursor:pointer" data-edit="${r.id}"><td class="num">${rkCell(rk[r.id])}</td><td>${esc(r.masalah)}<div>${chipHTML(calc(r).level)}</div></td><td class="num"><b>${calc(r).score}</b></td></tr>`).join('')}
+  </tbody></table></div>`:`<div class="empty">Belum ada data untuk unit & tahun ini.</div>`}`;
+}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-edit]');if(!t||e.target.closest('button[data-del]'))return;{const rr=DB.records.find(x=>x.id===t.dataset.edit);if(rr&&!canEdit(rr)){toast('Anda tidak berhak mengubah data unit '+rr.unit);return}}if(UI.input.draft&&UI.input.draft.editId!==t.dataset.edit&&!confirm('Ada isian yang belum disimpan. Buka data lain dan buang isian tersebut?'))return;if(UI.input.draft&&UI.input.draft.editId!==t.dataset.edit)clearDraft();UI.input.editId=t.dataset.edit;go('input')});
+
+/* ===================== VIEW: DATA ===================== */
+function filteredData(){
+  const d=UI.data,q=norm(d.q),rk=ranks(DB.records);
+  let list=DB.records.filter(r=>(!d.tahun||+r.tahun===+d.tahun)&&(!d.unit||r.unit===d.unit)&&(!d.level||calc(r).level===d.level)
+    &&(!q||norm([r.masalah,r.grup,r.subgrup,r.unit,r.rencana,r.pic,r.ket].join(' ')).includes(q)));
+  const key={prio:r=>rk[r.id],tahun:r=>r.tahun,unit:r=>r.unit,grup:r=>r.grup,masalah:r=>r.masalah,L:r=>r.L,I:r=>r.I,S:r=>r.S,li:r=>r.L*r.I,score:r=>calc(r).score,status:r=>STATUS.indexOf(r.status),seq:r=>r.seq||0}[d.sort]||(r=>rk[r.id]);
+  list.sort((a,b)=>{const x=key(a),y=key(b);return (typeof x==='string'?x.localeCompare(y):x-y)*d.dir||(a.seq||0)-(b.seq||0)});
+  return {list,rk};
+}
+function viewData(el){
+  const d=UI.data;
+  el.innerHTML=`
+  <div class="page-head"><div><h1>Data &amp; Excel</h1><p>${srcExcel()?'Lihat dan cari data, lalu unduh sebagai file Excel untuk laporan. Perubahan data dilakukan di Excel OneDrive.':'Lihat, cari, edit data, lalu unduh sebagai file Excel untuk laporan.'}</p></div>
+    <div class="row">
+      <button class="btn primary" id="btnXlsx">⬇ Unduh Excel (sesuai filter)</button>
+      <button class="btn" id="btnXlsxAll">⬇ Excel semua data</button>
+      <button class="btn edit-only admin-only" id="btnImport">⬆ Impor dari Excel</button>
+    </div></div>
+  ${backupBanner()}
+  <div class="toolbar">
+    <label class="f grow">Cari<input type="search" id="q" value="${esc(d.q)}" placeholder="Cari masalah, grup, unit, PIC…"></label>
+    <label class="f">Tahun<select id="dT">${filterOpts(d.tahun,years(),'Semua')}</select></label>
+    <label class="f">Unit<select id="dU">${filterOpts(d.unit,units(),'Semua')}</select></label>
+    <label class="f">Tingkat<select id="dL">${filterOpts(d.level,LEVELS.map(l=>l.k),'Semua')}</select></label>
+  </div>
+  <div id="tbl"></div>
+  <p class="small muted" style="margin-top:10px">File Excel berisi: (1) lembar format ICRA per tahun & unit (seperti template asli, dengan rumus skor), (2) Scoring/prioritas, (3) Rekap per grup, (4) Rencana tindak lanjut, (5) lembar <b>Data</b> — lembar ini bisa diedit di Excel lalu diimpor kembali.</p>`;
+  const drawTable=()=>{
+    const {list,rk}=filteredData();
+    const th=(k,t,cls='')=>`<th data-sort="${k}" class="${cls}">${t}${d.sort===k?(d.dir>0?' ▲':' ▼'):''}</th>`;
+    $('#tbl').innerHTML=`<div class="small muted" style="margin-bottom:6px">${list.length} dari ${DB.records.length} data</div><div class="table-wrap"><table class="dt"><thead><tr>
+      ${th('prio','Prio','num')}${th('tahun','Tahun','num')}${th('unit','Unit')}${th('grup','Grup / Sub grup')}${th('masalah','Potensial risiko / masalah')}${th('L','L','num')}${th('I','I','num')}${th('li','L×I','num')}<th class="nosort">Tingkat</th>${th('S','S','num')}${th('score','Skor','num')}<th class="nosort edit-only"></th></tr></thead><tbody>
+      ${list.map(r=>{const c=calc(r);return `<tr><td class="num">${rkCell(rk[r.id])}</td><td class="num">${r.tahun}</td><td class="small">${esc(r.unit)}</td><td class="small">${esc(trunc(r.grup,60))}<div class="muted">${esc(r.subgrup)}</div></td><td>${esc(r.masalah)}${r.rencana?`<div class="small muted">↳ ${esc(trunc(r.rencana,90))}</div>`:''}</td><td class="num" title="${esc(SC.L.lbl[r.L])}">${r.L}</td><td class="num" title="${esc(SC.I.lbl[r.I])}">${r.I}</td><td class="num">${c.li}</td><td>${chipHTML(c.level)}</td><td class="num" title="${esc(SC.S.lbl[r.S])}">${r.S}</td><td class="num"><b>${c.score}</b></td><td class="edit-only" style="white-space:nowrap">${canEdit(r)?`<button class="btn sm" data-edit="${r.id}">Edit</button> <button class="btn sm danger" data-del="${r.id}" title="Hapus">✕</button>`:''}${MODE==='server'&&r.updatedBy?`<div class="small muted" title="Terakhir diubah">${esc(r.updatedBy)}</div>`:''}</td></tr>`}).join('')||`<tr><td colspan="12" class="empty">Tidak ada data yang cocok</td></tr>`}
+      </tbody></table></div>`;
+  };
+  drawTable();
+  $('#q').oninput=e=>{d.q=e.target.value;drawTable()};
+  [['dT','tahun'],['dU','unit'],['dL','level']].forEach(([id,k])=>$('#'+id).onchange=e=>{d[k]=e.target.value;drawTable()});
+  $('#tbl').onclick=async e=>{
+    const s=e.target.closest('th[data-sort]');if(s){const k=s.dataset.sort;if(d.sort===k)d.dir*=-1;else{d.sort=k;d.dir=(k==='score'||k==='li'||k==='L'||k==='I'||k==='S'||k==='tahun')?-1:1}drawTable();return}
+    const del=e.target.closest('[data-del]');if(del){if(!confirm('Hapus data ini?'))return;await DB.del([del.dataset.del]);toast('Data dihapus');drawTable();render()}
+  };
+  $('#btnXlsx').onclick=()=>exportXlsx(filteredData().list);
+  $('#btnXlsxAll').onclick=()=>exportXlsx(DB.records);
+  $('#btnImport').onclick=()=>$('#fileXlsx').click();
+}
+
+/* ===================== VIEW: PANDUAN ===================== */
+function viewGuide(el){
+  const t=k=>`<table class="ref-table"><tr><th style="width:60px">Nilai</th><th style="width:170px">Deskripsi</th><th>Kriteria</th></tr>${[5,4,3,2,1].map(v=>`<tr><td><b>${v}</b></td><td>${esc(SC[k].lbl[v])}</td><td>${esc(SC[k].desc[v])}</td></tr>`).join('')}</table>`;
+  el.innerHTML=`<div class="page-head"><div><h1>Panduan Penetapan Risiko</h1><p>Diambil dari lembar “Penetapan risiko” pada file Excel Anda.</p></div></div>`+guideHTML();
+}
+function guideHTML(){
+  const t=k=>`<table class="ref-table"><tr><th style="width:60px">Nilai</th><th style="width:170px">Deskripsi</th><th>Kriteria</th></tr>${[5,4,3,2,1].map(v=>`<tr><td><b>${v}</b></td><td>${esc(SC[k].lbl[v])}</td><td>${esc(SC[k].desc[v])}</td></tr>`).join('')}</table>`;
+  return `<div class="card" style="margin-bottom:14px"><b>SKOR RISIKO (ICRA) = Likelihood/Probability × Consequences/Impact × Current System</b><br><span class="muted">Tingkat risiko ditentukan dari skor ICRA (L×I×S) sesuai legenda lembar “Penetapan risiko”: Significant ≥15 (15–25 dan lebih), High 10–14, Moderate 5–9, Low 1–4. Prioritas = urutan skor ICRA tertinggi dalam satu tahun & unit (skor sama → prioritas sama).</span></div>
+  <div class="grid g2">
+   <div class="card"><h3>Likelihood / Probability (Frekuensi)</h3>${t('L')}</div>
+   <div class="card"><h3>Consequences / Impact (Dampak)</h3>${t('I')}</div>
+   <div class="card"><h3>Current System (Sistem yang ada)</h3>${t('S')}</div>
+   <div class="card"><h3>Tingkat Risiko (berdasarkan Skor ICRA)</h3><table class="ref-table"><tr><th>Tingkat</th><th>Rentang</th><th>Tindakan</th></tr>${LEVELS.map(l=>`<tr><td>${chipHTML(l.k)}</td><td>${l.range}</td><td>${esc(l.act)}</td></tr>`).join('')}</table></div>
+  </div>`;
+}
+
+/* ===================== VIEW: PENGATURAN ===================== */
+function viewSettings(el){
+  const S=DB.S;
+  el.innerHTML=`<div class="page-head"><div><h1>Pengaturan &amp; Backup</h1><p>Identitas laporan, backup/restore database, dan pengelolaan data.</p></div></div>
+  <div class="grid g2" style="align-items:start">
+  <form class="card admin-only" id="prof"><h3>Identitas laporan (muncul di file Excel)</h3><p class="sub">Nama penandatangan pada lembar ICRA.</p>
+   <div class="form-grid" style="grid-template-columns:1fr 1fr">
+    <label class="f span4">Nama rumah sakit<input type="text" name="hospital" value="${esc(S.hospital)}"></label>
+    <label class="f">Tahun default input<input type="number" name="year" value="${esc(S.year)}"></label><span></span>
+    <label class="f">Yang membuat<input type="text" name="maker" value="${esc(S.maker)}"></label><label class="f">Jabatan<input type="text" name="makerRole" value="${esc(S.makerRole)}"></label>
+    <label class="f">Mengetahui<input type="text" name="chair" value="${esc(S.chair)}"></label><label class="f">Jabatan<input type="text" name="chairRole" value="${esc(S.chairRole)}"></label>
+    <label class="f">Menyetujui<input type="text" name="director" value="${esc(S.director)}"></label><label class="f">Jabatan<input type="text" name="directorRole" value="${esc(S.directorRole)}"></label>
+   </div><div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary">Simpan pengaturan</button></div></form>
+  <div class="grid">
+   ${MODE==='main'&&!SIMPLE?`<div class="card" style="border-top:4px solid #2a78d6"><h3>Sumber data</h3><p class="sub">Tentukan dari mana data ICRA diisi. Pilih satu sumber agar data tidak dobel atau saling menimpa.</p>
+    <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;cursor:pointer"><input type="radio" name="srcMode" value="excel" ${srcExcel()?'checked':''} style="margin-top:4px"><span><b>Excel OneDrive</b> (disarankan)<br><span class="small muted">Departemen mengisi Excel ICRA di OneDrive, lalu dashboard disinkronkan. Menu Input Data, tombol edit/hapus, dan file input departemen disembunyikan.</span></span></label>
+    <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer"><input type="radio" name="srcMode" value="dashboard" ${srcExcel()?'':'checked'} style="margin-top:4px"><span><b>Input lewat dashboard</b><br><span class="small muted">Untuk input darurat (misalnya OneDrive gangguan) atau jika tidak memakai OneDrive. Menu Input Data dan file input departemen aktif kembali.</span></span></label></div>`:''}
+   <div class="card server-only"><h3>Akun saya</h3><p class="sub">${ME?`${esc(ME.name)} (${esc(ME.username)}) · ${ROLE_LBL[ME.role]}${ME.units.length?' · unit: '+esc(ME.units.join(', ')):''}`:''}</p>
+    <form id="pwForm" class="form-grid" style="grid-template-columns:1fr 1fr"><label class="f">Password lama<input type="password" name="old" required autocomplete="current-password"></label><span></span><label class="f">Password baru (min. 8 karakter)<input type="password" name="new" required minlength="8" autocomplete="new-password"></label><label class="f">Ulangi password baru<input type="password" name="new2" required minlength="8" autocomplete="new-password"></label>
+    <div class="span4 row" style="justify-content:flex-end"><button class="btn primary">Ganti password</button></div></form></div>
+   <div class="card admin-only"><h3>Backup &amp; restore database</h3><p class="sub">${MODE==='server'?'Server membuat backup otomatis setiap hari di folder <b>backups/</b> pada komputer server. Anda juga bisa mengunduh backup manual (.json).':''}</p><p class="sub ${MODE==='server'?'hidden':''}">Data disimpan di database browser (IndexedDB) pada komputer ini — tidak dikirim ke internet. Simpan file backup (.json) secara rutin, mis. ke folder jaringan RS atau flashdisk terenkripsi. File backup juga dipakai untuk memindahkan data ke komputer lain.</p>
+    <div class="row"><button class="btn primary" data-act="backup">⬇ Backup database (.json)</button><button class="btn" id="btnRestore">⬆ Restore dari backup</button></div>
+    <p class="small muted ${MODE==='server'?'hidden':''}" style="margin:10px 0 0">Backup terakhir: ${DB.settings.lastBackup?fmtDate(DB.settings.lastBackup):'belum pernah'} · Penyimpanan permanen: <span id="persist">memeriksa…</span></p></div>
+   <div class="card dash-only admin-only"><h3>Salin penilaian ke tahun baru</h3><p class="sub">Untuk penilaian ulang tahunan: daftar risiko disalin beserta nilai lama sebagai titik awal untuk dinilai ulang.</p>
+    <div class="row"><label class="f">Dari tahun<select id="cpFrom">${filterOpts('',years())}</select></label><label class="f">Unit<select id="cpUnit">${filterOpts('',units(),'Semua unit')}</select></label><label class="f">Ke tahun<input type="number" id="cpTo" value="${(years()[0]||S.year)+1}" style="width:100px"></label><button class="btn" id="btnCopy" style="align-self:flex-end">Salin</button></div></div>
+   <div class="card admin-only"><h3>Kelola data</h3><p class="sub">Muat ulang data contoh dari file Excel ICRA SHTB 2026 (${SEED?SEED.records.length:0} item), atau hapus seluruh data.</p>
+    <div class="row"><button class="btn dash-only" id="btnSeed" ${MODE!=='main'?'style="display:none"':''}>Tambahkan data dari Excel awal</button><button class="btn danger" id="btnWipe">Hapus semua data</button></div></div>
+  </div></div>`;
+  $('#prof').onsubmit=async e=>{e.preventDefault();const f=e.target;const p={};['hospital','year','maker','makerRole','chair','chairRole','director','directorRole'].forEach(k=>p[k]=k==='year'?+f[k].value:f[k].value.trim());await DB.setSetting('profile',p);toast('Pengaturan disimpan');render()};
+  $('#btnRestore').onclick=()=>$('#fileJson').click();
+  $('#pwForm')&&($('#pwForm').onsubmit=async e=>{e.preventDefault();const f=e.target;if(f.new.value!==f.new2.value){toast('Ulangi password baru tidak sama');return}
+    try{await api('/api/password',{method:'POST',body:JSON.stringify({old:f.old.value,new:f.new.value})});f.reset();toast('Password berhasil diganti')}catch(err){alert(err.message)}});
+  $$('input[name=srcMode]').forEach(r=>r.onchange=async()=>{await DB.setSetting('sourceMode',r.value);toast(r.value==='excel'?'Sumber data: Excel OneDrive. Menu Input Data disembunyikan.':'Sumber data: input lewat dashboard. Menu Input Data aktif.',3500);render()});
+  $('#btnSeed').onclick=async()=>{if(!confirm('Tambahkan '+(SEED?.records.length||0)+' data dari Excel awal ke database?'))return;await DB.saveMany(seedRecords());toast('Data awal ditambahkan');render()};
+  $('#btnWipe').onclick=async()=>{if(!confirm('Hapus SEMUA data risiko? Pastikan sudah backup.'))return;if(prompt('Ketik HAPUS untuk konfirmasi')!=='HAPUS')return;await DB.clear();toast('Semua data dihapus');render()};
+  $('#btnCopy').onclick=async()=>{const from=+$('#cpFrom').value,to=+$('#cpTo').value,u=$('#cpUnit').value;
+    if(!from||!to||from===to){toast('Pilih tahun asal dan tujuan yang berbeda');return}
+    const src=DB.records.filter(r=>+r.tahun===from&&(!u||r.unit===u));
+    const exist=new Set(DB.records.filter(r=>+r.tahun===to).map(r=>r.unit+'|'+norm(r.masalah)));
+    let seq=maxSeq();const now=new Date().toISOString();
+    const out=src.filter(r=>!exist.has(r.unit+'|'+norm(r.masalah))).map(r=>({...r,id:uid(),seq:++seq,tahun:to,status:'Belum',bukti:'',ket:'Disalin dari '+from,createdAt:now,updatedAt:now}));
+    if(!out.length){toast('Tidak ada data baru untuk disalin');return}
+    if(!confirm(`Salin ${out.length} risiko dari ${from} ke ${to}?`))return;
+    await DB.saveMany(out);toast(out.length+' risiko disalin ke tahun '+to);render()};
+  if(navigator.storage&&navigator.storage.persisted) navigator.storage.persisted().then(p=>{const s=$('#persist');if(s)s.textContent=p?'aktif ✓':'tidak aktif (browser dapat menghapus data bila disk penuh – rutin backup)'});else $('#persist').textContent='tidak diketahui';
+}
+
+/* ===================== PENGGUNA (mode server) ===================== */
+async function viewUsers(el){
+  el.innerHTML=`<div class="page-head"><div><h1>Pengguna &amp; Riwayat</h1><p>Kelola akun yang boleh membuka dashboard dan lihat riwayat perubahan data.</p></div></div><div class="card empty">Memuat…</div>`;
+  let users=[],aud=[];try{[users,aud]=await Promise.all([api('/api/users').then(j=>j.users),api('/api/audit').then(j=>j.audit)])}catch(err){el.innerHTML=`<div class="card">${esc(err.message)}</div>`;return}
+  const allUnits=uniq([...DEFAULT_UNITS,...units()]);
+  el.innerHTML=`<div class="page-head"><div><h1>Pengguna &amp; Riwayat</h1><p>Kelola akun yang boleh membuka dashboard dan lihat riwayat perubahan data.</p></div></div>
+  <div class="grid g2" style="align-items:start">
+   <div class="card"><h3>Daftar pengguna (${users.length})</h3><p class="sub"><b>Admin</b>: akses penuh · <b>Departemen</b>: input &amp; edit data unitnya sendiri, melihat seluruh dashboard · <b>Pimpinan</b>: hanya melihat</p>
+    <div class="table-wrap" style="max-height:60vh"><table class="dt"><thead><tr><th class="nosort">Username</th><th class="nosort">Nama</th><th class="nosort">Peran</th><th class="nosort">Unit</th><th class="nosort">Login terakhir</th><th class="nosort"></th></tr></thead><tbody>
+    ${users.map(u=>`<tr><td><b>${esc(u.username)}</b></td><td>${esc(u.name)}</td><td>${ROLE_LBL[u.role]||u.role}</td><td class="small">${esc(u.units.join(', '))}</td><td class="small">${u.last_login?fmtDate(u.last_login):'-'}</td><td style="white-space:nowrap"><button class="btn sm" data-ue="${esc(u.username)}">Edit</button> ${u.username!==ME.username?`<button class="btn sm danger" data-ud="${esc(u.username)}">✕</button>`:''}</td></tr>`).join('')}
+    </tbody></table></div></div>
+   <form class="card" id="uForm" autocomplete="off"><h3 id="uTitle">Tambah pengguna</h3><p class="sub">Bagikan username &amp; password ke pengguna secara langsung (jangan lewat grup chat).</p>
+    <div class="form-grid" style="grid-template-columns:1fr 1fr">
+     <label class="f">Username *<input type="text" name="username" required placeholder="mis. icu.rina"></label>
+     <label class="f">Nama lengkap<input type="text" name="name" placeholder="mis. Ns. Rina (ICU)"></label>
+     <label class="f">Peran *<select name="role"><option value="departemen">Departemen</option><option value="pimpinan">Pimpinan</option><option value="admin">Admin</option></select></label>
+     <label class="f">Password <span class="muted" style="font-weight:400" id="pwHint">(min. 8 karakter)</span><input type="text" name="password" placeholder="kosongkan bila tidak diubah"></label>
+     <div class="span4" id="unitBox"><label class="f">Unit yang boleh diisi (khusus peran Departemen)</label>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 10px;max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:4px">${allUnits.map(u=>`<label class="small" style="display:flex;gap:6px;align-items:center"><input type="checkbox" name="units" value="${esc(u)}">${esc(u)}</label>`).join('')}</div></div>
+    </div>
+    <div class="row" style="justify-content:flex-end;margin-top:12px"><button type="button" class="btn" id="uReset">Kosongkan</button><button class="btn primary">Simpan pengguna</button></div></form>
+   <div class="card" style="grid-column:1/-1"><h3>Riwayat aktivitas (300 terakhir)</h3><p class="sub">Catatan siapa yang login, menyimpan, menghapus data, dan mengubah pengguna.</p>
+    <div class="table-wrap" style="max-height:50vh"><table class="dt"><thead><tr><th class="nosort">Waktu</th><th class="nosort">Pengguna</th><th class="nosort">Aktivitas</th><th class="nosort">Detail</th></tr></thead><tbody>
+    ${aud.map(a=>`<tr><td class="small" style="white-space:nowrap">${new Date(a.ts).toLocaleString('id-ID',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td><td>${esc(a.user)}</td><td>${esc(a.action)}</td><td class="small">${esc(a.detail)}</td></tr>`).join('')}
+    </tbody></table></div></div></div>`;
+  const f=$('#uForm');
+  const toggleUnits=()=>$('#unitBox').style.opacity=f.role.value==='departemen'?1:.4;f.role.onchange=toggleUnits;toggleUnits();
+  const reset=()=>{f.reset();f.username.readOnly=false;$('#uTitle').textContent='Tambah pengguna';toggleUnits()};$('#uReset').onclick=reset;
+  el.onclick=async e=>{
+    const ed=e.target.closest('[data-ue]');if(ed){const u=users.find(x=>x.username===ed.dataset.ue);f.username.value=u.username;f.username.readOnly=true;f.name.value=u.name;f.role.value=u.role;f.password.value='';
+      $$('input[name=units]',f).forEach(c=>c.checked=u.units.includes(c.value));$('#uTitle').textContent='Edit pengguna: '+u.username;toggleUnits();f.scrollIntoView({behavior:'smooth'});return}
+    const dl=e.target.closest('[data-ud]');if(dl){if(!confirm('Hapus pengguna '+dl.dataset.ud+'?'))return;try{await api('/api/users/delete',{method:'POST',body:JSON.stringify({username:dl.dataset.ud})});toast('Pengguna dihapus');render()}catch(err){alert(err.message)}}
+  };
+  f.onsubmit=async e=>{e.preventDefault();
+    const body={username:f.username.value.trim().toLowerCase(),name:f.name.value.trim(),role:f.role.value,password:f.password.value.trim(),units:$$('input[name=units]:checked',f).map(c=>c.value)};
+    if(!f.username.readOnly&&!body.password){toast('Password wajib diisi untuk pengguna baru');return}
+    try{await api('/api/users',{method:'POST',body:JSON.stringify(body)});toast('Pengguna disimpan');render()}catch(err){alert(err.message)}};
+}
+
+/* ===================== BACKUP JSON ===================== */
+async function backupJSON(){
+  if(MODE==='server'){try{const d=await api('/api/backup');download(new Blob([JSON.stringify(d,null,1)],{type:'application/json'}),`Backup_ICRA_Server_${new Date().toISOString().slice(0,10)}.json`);toast('File backup diunduh')}catch(err){alert(err.message)}return}
+  const data={app:'ICRA-Dashboard',version:1,exportedAt:new Date().toISOString(),profile:DB.S,records:DB.records};
+  download(new Blob([JSON.stringify(data,null,1)],{type:'application/json'}),`Backup_ICRA_${new Date().toISOString().slice(0,10)}.json`);
+  await DB.setSetting('lastBackup',new Date().toISOString());render();toast('File backup diunduh');
+}
+$('#fileJson').onchange=async e=>{
+  const file=e.target.files[0];e.target.value='';if(!file)return;
+  try{const d=JSON.parse(await file.text());if(!Array.isArray(d.records))throw new Error('Format backup tidak dikenali');
+    const mode=confirm(`Backup berisi ${d.records.length} data (dibuat ${fmtDate(d.exportedAt)}).\n\nOK = GANTI seluruh data saat ini dengan isi backup\nBatal = GABUNGKAN (data dengan ID sama ditimpa)`);
+    if(MODE==='server'){await api('/api/restore',{method:'POST',body:JSON.stringify({records:d.records,mode:mode?'replace':'merge',profile:d.profile})});await DB.load();toast('Restore selesai: '+d.records.length+' data');render();return}
+    if(mode) await DB.clear();
+    await DB.saveMany(d.records.map(r=>({...r,id:r.id||uid()})));
+    if(d.profile) await DB.setSetting('profile',d.profile);
+    toast('Restore selesai: '+d.records.length+' data');render();
+  }catch(err){alert('Gagal membaca backup: '+err.message)}
+};
+
+/* ===================== XLSX WRITER (tanpa library) ===================== */
+const CRC_T=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC_T[(c^b[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function zipStore(files,mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'){
+  const enc=new TextEncoder();const parts=[],central=[];let off=0;
+  for(const f of files){const nb=enc.encode(f.name),d=typeof f.data==='string'?enc.encode(f.data):f.data,crc=crc32(d);
+    const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(12,0x21,true);h.setUint32(14,crc,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nb.length,true);
+    parts.push(new Uint8Array(h.buffer),nb,d);
+    const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(14,0x21,true);c.setUint32(16,crc,true);c.setUint32(20,d.length,true);c.setUint32(24,d.length,true);c.setUint16(28,nb.length,true);c.setUint32(42,off,true);
+    central.push(new Uint8Array(c.buffer),nb);off+=30+nb.length+d.length;}
+  const cs=central.reduce((a,b)=>a+b.length,0);
+  const e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...central,new Uint8Array(e.buffer)],{type:mime});
+}
+const xesc=s=>String(s??'').replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const colL=c=>{let s='';c++;while(c>0){const m=(c-1)%26;s=String.fromCharCode(65+m)+s;c=Math.floor((c-1)/26)}return s};
+const ref=(r,c)=>colL(c)+(r+1);
+/* style ids */
+const X={def:0,head:1,text:2,num:3,Low:4,Moderate:5,High:6,Significant:7,title:8,bold:9,grp:10,headDark:11,numBold:12,center:13,textRed:14};
+class XSheet{
+  constructor(name){this.name=name;this.validations=[];this.cf=[];this.cells={};this.merges=[];this.widths={};this.heights={};this.freeze=0;this.landscape=true}
+  set(r,c,v,s=X.text,f=null){(this.cells[r]??={})[c]={v,s,f};return this}
+  merge(r1,c1,r2,c2){if(r1!==r2||c1!==c2)this.merges.push(`${ref(r1,c1)}:${ref(r2,c2)}`);return this}
+  width(c,w){this.widths[c]=w;return this}
+  xml(){
+    const rows=Object.keys(this.cells).map(Number).sort((a,b)=>a-b);
+    let sd='';for(const r of rows){const cs=this.cells[r];const ht=this.heights[r]?` ht="${this.heights[r]}" customHeight="1"`:'';
+      sd+=`<row r="${r+1}"${ht}>`;
+      for(const c of Object.keys(cs).map(Number).sort((a,b)=>a-b)){const {v,s,f}=cs[c];const R=ref(r,c);
+        if(f) sd+=`<c r="${R}" s="${s}"><f>${xesc(f)}</f>${typeof v==='number'?`<v>${v}</v>`:''}</c>`;
+        else if(typeof v==='number'&&isFinite(v)) sd+=`<c r="${R}" s="${s}"><v>${v}</v></c>`;
+        else if(v===null||v===undefined||v==='') sd+=`<c r="${R}" s="${s}"/>`;
+        else sd+=`<c r="${R}" s="${s}" t="inlineStr"><is><t xml:space="preserve">${xesc(v)}</t></is></c>`;}
+      sd+='</row>';}
+    const cols=Object.keys(this.widths).map(Number).sort((a,b)=>a-b).map(c=>`<col min="${c+1}" max="${c+1}" width="${this.widths[c]}" customWidth="1"/>`).join('');
+    const pane=this.freeze?`<pane ySplit="${this.freeze}" topLeftCell="A${this.freeze+1}" activePane="bottomLeft" state="frozen"/>`:'';
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><sheetViews><sheetView workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>${cols?`<cols>${cols}</cols>`:''}<sheetData>${sd}</sheetData>${this.merges.length?`<mergeCells count="${this.merges.length}">${this.merges.map(m=>`<mergeCell ref="${m}"/>`).join('')}</mergeCells>`:''}${this.cf.map((c,i)=>`<conditionalFormatting sqref="${c.sqref}"><cfRule type="expression" dxfId="${c.dxf}" priority="${i+1}"><formula>${xesc(c.f)}</formula></cfRule></conditionalFormatting>`).join('')}${this.validations.length?`<dataValidations count="${this.validations.length}">${this.validations.map(v=>`<dataValidation type="list" allowBlank="1"${''} showInputMessage="1" showErrorMessage="${v.strict?1:0}"${v.prompt?` promptTitle="${xesc(v.title||'')}" prompt="${xesc(v.prompt)}"`:''} sqref="${v.sqref}"><formula1>${xesc(v.f)}</formula1></dataValidation>`).join('')}</dataValidations>`:''}<pageMargins left="0.4" right="0.4" top="0.5" bottom="0.5" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="${this.landscape?'landscape':'portrait'}" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+  }
+}
+function stylesXml(){
+  const fills=['FFDCE6F1',LV.Low.xl,LV.Moderate.xl,LV.High.xl,LV.Significant.xl,'FFF2F2F2','FF0F4C5C'];
+  const B='<border><left style="thin"><color rgb="FF8C8C8C"/></left><right style="thin"><color rgb="FF8C8C8C"/></right><top style="thin"><color rgb="FF8C8C8C"/></top><bottom style="thin"><color rgb="FF8C8C8C"/></bottom><diagonal/></border>';
+  const xf=(font,fill,border,h,v,wrap=1)=>`<xf numFmtId="0" fontId="${font}" fillId="${fill}" borderId="${border}" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="${h}" vertical="${v}"${wrap?' wrapText="1"':''}/></xf>`;
+  const xfs=[
+    '<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>',
+    xf(1,2,1,'center','center'),      //1 head
+    xf(0,0,1,'left','top'),           //2 text
+    xf(0,0,1,'center','center'),      //3 num
+    xf(1,3,1,'center','center'),      //4 Low
+    xf(1,4,1,'center','center'),      //5 Moderate
+    xf(1,5,1,'center','center'),      //6 High
+    xf(3,6,1,'center','center'),      //7 Significant
+    xf(2,0,0,'center','center'),      //8 title
+    xf(1,0,0,'left','center',0),      //9 bold
+    xf(1,7,1,'left','top'),           //10 grp
+    xf(3,8,1,'center','center'),      //11 headDark
+    xf(1,0,1,'center','center'),      //12 numBold
+    xf(0,0,0,'center','center'),      //13 center no border
+    xf(4,0,1,'left','top'),           //14 textRed
+  ];
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><fonts count="5"><font><sz val="10"/><name val="Calibri"/></font><font><b/><sz val="10"/><name val="Calibri"/></font><font><b/><sz val="14"/><name val="Calibri"/></font><font><b/><sz val="10"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font><font><b/><sz val="10"/><color rgb="FFC00000"/><name val="Calibri"/></font></fonts><fills count="${fills.length+2}"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>${fills.map(c=>`<fill><patternFill patternType="solid"><fgColor rgb="${c}"/><bgColor indexed="64"/></patternFill></fill>`).join('')}</fills><borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>${B}</borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="${xfs.length}">${xfs.join('')}</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles><dxfs count="4">${[['FFFF0000','FFFFFFFF'],['FFFFC000','FF000000'],['FFFFFF00','FF000000'],['FF92D050','FF000000']].map(([f,c])=>`<dxf><font><b/><color rgb="${c}"/></font><fill><patternFill patternType="solid"><fgColor rgb="${f}"/><bgColor rgb="${f}"/></patternFill></fill></dxf>`).join('')}</dxfs></styleSheet>`;
+}
+function buildXlsx(sheets){
+  const used=new Set();sheets.forEach(s=>{let n=s.name.replace(/[\[\]:*?\/\\]/g,' ').slice(0,31).trim()||'Sheet';let b=n,i=2;while(used.has(n.toLowerCase())){n=b.slice(0,28)+' '+i++}used.add(n.toLowerCase());s.name=n});
+  const files=[
+    {name:'[Content_Types].xml',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>${sheets.map((s,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}</Types>`},
+    {name:'_rels/.rels',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`},
+    {name:'xl/workbook.xml',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map((s,i)=>`<sheet name="${xesc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`},
+    {name:'xl/_rels/workbook.xml.rels',data:`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s,i)=>`<Relationship Id="rId${i+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`},
+    {name:'xl/styles.xml',data:stylesXml()},
+    ...sheets.map((s,i)=>({name:`xl/worksheets/sheet${i+1}.xml`,data:s.xml()}))
+  ];
+  return zipStore(files);
+}
+
+/* ---- isi workbook ICRA ---- */
+function sheetICRA(tahun,unit,recs,rk){
+  const S=DB.S;const sh=new XSheet(`${String(unit).slice(0,25).trim()} ${tahun}`);
+  const LC=4,IC=9,OC=14,PC=15,SCc=16,VC=21,WC=22; // kolom E, J, O, P, Q, V, W
+  sh.set(0,0,'Infection Control Risk Assessment',X.title).merge(0,0,0,WC);
+  sh.set(1,0,`${S.hospital} · ${unit} · Tahun ${tahun}`,X.title).merge(1,0,1,WC);sh.heights[0]=22;sh.heights[1]=22;
+  const h0=3;
+  [['NO',0],['GRUP RISIKO (Kategori)',1],['SUB GRUP (Sub Kategori)',2],['POTENSIAL RISK / MASALAH',3],['Skor L×I',OC],['Tingkat Risiko (skor ICRA)',PC],['Score',VC],['Prioritas',WC]].forEach(([t,c])=>{sh.set(h0,c,t,X.headDark);sh.set(h0+1,c,'',X.headDark);sh.set(h0+2,c,'',X.headDark);sh.merge(h0,c,h0+2,c)});
+  [['Likelihood / Probability',LC,'L'],['Consequences / Impact',IC,'I'],['Current Systems',SCc,'S']].forEach(([t,c,k])=>{
+    sh.set(h0,c,t,X.headDark);for(let i=1;i<5;i++)sh.set(h0,c+i,'',X.headDark);sh.merge(h0,c,h0,c+4);
+    [5,4,3,2,1].forEach((v,i)=>{sh.set(h0+1,c+i,k==='I'?{5:'Catastropic loss (life / limb / function / financial / legal)',4:'Serious loss (function / financial / legal)',3:'Prolonged length of stay',2:'Moderate clinical / financial',1:'Minimal clinical / financial'}[v]:SC[k].lbl[v],X.head);sh.set(h0+2,c+i,v,X.head)})});
+  sh.heights[h0+1]=78;sh.freeze=h0+3;
+  [5,28,20,46].forEach((w,c)=>sh.width(c,w));for(let c=4;c<=20;c++)sh.width(c,c>=9&&c<=13?9.5:7.5);sh.width(OC,8);sh.width(PC,14);sh.width(VC,8);sh.width(WC,9);
+  // urut per grup sesuai urutan input
+  const order=[];const byG={};[...recs].sort((a,b)=>(a.seq||0)-(b.seq||0)).forEach(r=>{const g=r.grup||'(Tanpa grup)';if(!byG[g]){byG[g]=[];order.push(g)}byG[g].push(r)});
+  let row=h0+3,no=0;
+  for(const g of order){const start=row;no++;
+    for(const r of byG[g]){const c=calc(r);const R=row+1;
+      sh.set(row,0,row===start?no:'',X.num);sh.set(row,1,row===start?g:'',X.text);sh.set(row,2,r.subgrup,X.text);sh.set(row,3,r.masalah,X.text);
+      for(let i=0;i<5;i++){const v=5-i;sh.set(row,LC+i,r.L===v?v:'',X.num);sh.set(row,IC+i,r.I===v?v:'',X.num);sh.set(row,SCc+i,r.S===v?v:'',X.num)}
+      sh.set(row,OC,c.li,X.num,`SUM(E${R}:I${R})*SUM(J${R}:N${R})`);
+      sh.set(row,PC,c.level,X[c.level]);
+      const top=rk[r.id]<=3;
+      sh.set(row,VC,c.score,top?X.Significant:X.numBold,`SUM(E${R}:I${R})*SUM(J${R}:N${R})*SUM(Q${R}:U${R})`);
+      sh.set(row,WC,rk[r.id],top?X.Significant:X.numBold);if(top)sh.set(row,3,r.masalah,X.textRed);row++;}
+    if(row-1>start){sh.merge(start,0,row-1,0);sh.merge(start,1,row-1,1)}
+  }
+  row+=1;sh.set(row,1,'Keterangan tingkat risiko (berdasarkan skor ICRA = L × I × S):',X.bold);row++;
+  LEVELS.forEach(l=>{sh.set(row,1,`${l.k} (${l.range})`,X[l.k]);sh.set(row,2,l.act,X.text);sh.merge(row,2,row,8);for(let c=3;c<=8;c++)sh.set(row,c,'',X.text);sh.heights[row]=28;row++});
+  sh.set(row,1,'Skor = Likelihood × Impact × Current System. Prioritas = urutan skor tertinggi (skor sama → prioritas sama). Warna merah pada kolom Score/Prioritas = 3 prioritas utama.',X.def);row+=2;
+  sh.set(row,1,'Yang Membuat',X.center);sh.set(row,6,'Mengetahui',X.center);sh.merge(row,6,row,12);sh.set(row,15,'Menyetujui',X.center);sh.merge(row,15,row,21);row+=4;
+  sh.set(row,1,S.maker,X.center);sh.set(row,6,S.chair,X.center);sh.merge(row,6,row,12);sh.set(row,15,S.director,X.center);sh.merge(row,15,row,21);row++;
+  sh.set(row,1,S.makerRole,X.center);sh.set(row,6,S.chairRole,X.center);sh.merge(row,6,row,12);sh.set(row,15,S.directorRole,X.center);sh.merge(row,15,row,21);
+  return sh;
+}
+function exportXlsx(recs){
+  if(!recs.length){toast('Tidak ada data untuk diunduh');return}
+  const rk=ranks(DB.records);const S=DB.S;const sheets=[];
+  const combos=uniq(recs.map(r=>r.tahun+'|'+r.unit)).sort((a,b)=>b.localeCompare(a));
+  // 1. lembar ICRA per tahun-unit
+  combos.forEach(k=>{const [t,u]=[k.split('|')[0],k.slice(k.indexOf('|')+1)];sheets.push(sheetICRA(t,u,recs.filter(r=>r.tahun+'|'+r.unit===k),rk))});
+  // 2. Scoring
+  const sc=new XSheet('Scoring');sc.set(0,0,`SCORING INFECTION CONTROL RISK ASSESSMENT (ICRA) ${S.hospital.toUpperCase()}`,X.title).merge(0,0,0,9);
+  const hd=['Tahun','Unit','Prioritas','Kategori / Sub grup','Event / Conditions and Problems','Likelihood','Impact','Current System','Numeric risk level (Skor)','Tingkat Risiko'];
+  hd.forEach((t,c)=>sc.set(2,c,t,X.headDark));sc.freeze=3;[8,22,9,24,55,10,10,10,12,13].forEach((w,c)=>sc.width(c,w));
+  const sorted=[...recs].sort((a,b)=>b.tahun-a.tahun||a.unit.localeCompare(b.unit)||rk[a.id]-rk[b.id]);
+  sorted.forEach((r,i)=>{const c=calc(r),R=i+3;[r.tahun,r.unit,rk[r.id],r.subgrup||r.grup,r.masalah,r.L,r.I,r.S].forEach((v,j)=>sc.set(R,j,v,typeof v==='number'?X.num:X.text));const top=rk[r.id]<=3;if(top){sc.set(R,2,rk[r.id],X.Significant);sc.set(R,4,r.masalah,X.textRed)}sc.set(R,8,c.score,top?X.Significant:X.numBold,`F${R+1}*G${R+1}*H${R+1}`);sc.set(R,9,c.level,X[c.level])});
+  sheets.push(sc);
+  // 3. Rekap per grup
+  const rp=new XSheet('Rekap per Grup');rp.set(0,0,'REKAP RISIKO PER GRUP',X.title).merge(0,0,0,9);
+  ['Tahun','Unit','Grup Risiko','Jumlah','Significant','High','Moderate','Low','Skor tertinggi','Rata-rata skor'].forEach((t,c)=>rp.set(2,c,t,X.headDark));[8,22,50,9,11,9,10,9,12,12].forEach((w,c)=>rp.width(c,w));rp.freeze=3;
+  let rr=3;combos.forEach(k=>{const sub=recs.filter(r=>r.tahun+'|'+r.unit===k);const gm={};sub.forEach(r=>(gm[r.grup||'(Tanpa grup)']??=[]).push(r));
+    const first=rr;Object.entries(gm).forEach(([g,list])=>{const cs=list.map(calc);const n=l=>cs.filter(c=>c.level===l).length;
+      [sub[0].tahun,sub[0].unit,g,list.length,n('Significant'),n('High'),n('Moderate'),n('Low'),Math.max(...cs.map(c=>c.score)),Math.round(cs.reduce((a,c)=>a+c.score,0)/cs.length*10)/10].forEach((v,j)=>rp.set(rr,j,v,j<3?X.text:X.num));rr++});
+    rp.set(rr,2,'TOTAL',X.bold);for(let j=3;j<=7;j++)rp.set(rr,j,null,X.numBold,`SUM(${colL(j)}${first+1}:${colL(j)}${rr})`);
+    // nilai cache utk total
+    [3,4,5,6,7].forEach(j=>{let s=0;for(let q=first;q<rr;q++)s+=rp.cells[q][j].v;rp.cells[rr][j].v=s});rr+=2});
+  sheets.push(rp);
+  // 4. Rencana tindak lanjut
+  const pa=new XSheet('Rencana Tindak Lanjut');pa.set(0,0,'PRIORITAS RISIKO PENCEGAHAN DAN PENGENDALIAN INFEKSI',X.title).merge(0,0,0,10);pa.set(1,0,S.hospital,X.title).merge(1,0,1,10);
+  ['Tahun','Unit','Prioritas','Prioritas risiko','Skor','Tujuan','Obyektif yang dapat diukur','Strategi','PIC','Waktu','Bukti evaluasi'].forEach((t,c)=>pa.set(3,c,t,X.headDark));[8,20,9,42,7,30,30,40,16,14,24].forEach((w,c)=>pa.width(c,w));pa.freeze=4;
+  const pl=sorted.filter(r=>rk[r.id]<=3||r.rencana||r.tujuan||r.pic);
+  pl.forEach((r,i)=>[r.tahun,r.unit,rk[r.id],r.masalah,calc(r).score,r.tujuan,r.indikator,r.rencana,r.pic,r.target,r.bukti].forEach((v,j)=>pa.set(i+4,j,v,typeof v==='number'?X.num:X.text)));
+  sheets.push(pa);
+  // 5. Data (format impor ulang)
+  const dt=new XSheet('Data');const cols=['ID','Tahun','Unit','Grup Risiko','Sub Grup','Potensi Risiko','Likelihood','Impact','Current System','LxI','Tingkat Risiko','Skor','Prioritas','Tujuan','Indikator','Rencana Tindak Lanjut','PIC','Target Waktu','Bukti Evaluasi','Keterangan','Diperbarui'];
+  cols.forEach((t,c)=>dt.set(0,c,t,X.headDark));dt.freeze=1;[16,7,20,34,18,50,9,9,11,6,11,7,8,24,24,30,14,14,20,24,18].forEach((w,c)=>dt.width(c,w));
+  sorted.forEach((r,i)=>{const c=calc(r);[r.id,r.tahun,r.unit,r.grup,r.subgrup,r.masalah,r.L,r.I,r.S,c.li,c.level,c.score,rk[r.id],r.tujuan,r.indikator,r.rencana,r.pic,r.target,r.bukti,r.ket,(r.updatedAt||'').slice(0,10)].forEach((v,j)=>dt.set(i+1,j,v,j===10?X[c.level]:typeof v==='number'?X.num:X.text))});
+  sheets.push(dt);
+  const name=combos.length===1?`ICRA_${combos[0].replace('|','_')}`:`ICRA_${uniq(recs.map(r=>r.tahun)).sort().join('-')}`;
+  download(buildXlsx(sheets),name.replace(/[^\w\-]+/g,'_')+'.xlsx');toast('File Excel diunduh');
+}
+
+/* ===================== XLSX READER (impor) ===================== */
+async function unzip(buf){
+  const dv=new DataView(buf);let eocd=-1;
+  for(let i=buf.byteLength-22;i>=Math.max(0,buf.byteLength-65557);i--){if(dv.getUint32(i,true)===0x06054b50){eocd=i;break}}
+  if(eocd<0)throw new Error('File bukan .xlsx yang valid');
+  const n=dv.getUint16(eocd+10,true);let p=dv.getUint32(eocd+16,true);const out={};const dec=new TextDecoder();
+  for(let k=0;k<n;k++){
+    const method=dv.getUint16(p+10,true),csize=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),xl=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true);
+    const name=dec.decode(new Uint8Array(buf,p+46,nl));const lnl=dv.getUint16(lo+26,true),lxl=dv.getUint16(lo+28,true);
+    out[name]={method,data:new Uint8Array(buf,lo+30+lnl+lxl,csize)};p+=46+nl+xl+cl;}
+  return out;
+}
+async function readEntry(e){
+  if(!e)return '';let bytes=e.data;
+  if(e.method===8){if(typeof DecompressionStream==='undefined')throw new Error('Browser terlalu lama untuk membaca .xlsx. Gunakan Chrome/Edge versi terbaru.');
+    const s=new Blob([e.data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));bytes=new Uint8Array(await new Response(s).arrayBuffer())}
+  return new TextDecoder().decode(bytes);
+}
+const unx=s=>s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'").replace(/&#(\d+);/g,(_,d)=>String.fromCharCode(+d)).replace(/&#x([0-9a-f]+);/gi,(_,h)=>String.fromCharCode(parseInt(h,16))).replace(/&amp;/g,'&').replace(/_x000D_/g,'');
+function colIdx(letters){let n=0;for(const ch of letters)n=n*26+ch.charCodeAt(0)-64;return n-1}
+async function readXlsx(buf){
+  const z=await unzip(buf);
+  const wb=await readEntry(z['xl/workbook.xml']);const rels=await readEntry(z['xl/_rels/workbook.xml.rels']);
+  const relMap={};for(const m of rels.matchAll(/<Relationship\b([^>]*)\/?>/g)){const id=/Id="([^"]+)"/.exec(m[1])?.[1],t=/Target="([^"]+)"/.exec(m[1])?.[1];if(id)relMap[id]=t}
+  const ssXml=await readEntry(z['xl/sharedStrings.xml']);const ss=[];
+  for(const m of ssXml.matchAll(/<si>([\s\S]*?)<\/si>|<si\/>/g)){ss.push(m[1]?unx([...m[1].replace(/<rPh[\s\S]*?<\/rPh>/g,'').matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(x=>x[1]).join('')):'')}
+  const sheets=[];
+  for(const m of wb.matchAll(/<sheet\b([^>]*)\/>/g)){
+    const name=unx(/name="([^"]*)"/.exec(m[1])[1]);const rid=/r:id="([^"]+)"/.exec(m[1])?.[1];let tgt=relMap[rid]||'';
+    tgt=tgt.startsWith('/')?tgt.slice(1):'xl/'+tgt.replace(/^\.\//,'');
+    const xml=await readEntry(z[tgt]);const grid=[];
+    for(const c of xml.matchAll(/<c ([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)){
+      const a=c[1];const r=/r="([A-Z]+)(\d+)"/.exec(a);if(!r)continue;const t=/t="(\w+)"/.exec(a)?.[1];const body=c[2]||'';
+      let v=/<v>([\s\S]*?)<\/v>/.exec(body)?.[1];let val=null;
+      if(t==='s')val=ss[+v]??'';else if(t==='inlineStr')val=unx([...body.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(x=>x[1]).join(''));
+      else if(t==='str'||t==='e')val=v!==undefined?unx(v):'';else if(t==='b')val=v==='1';else if(v!==undefined)val=Number(v);
+      if(val===null||val==='')continue;
+      const ri=+r[2]-1,ci=colIdx(r[1]);(grid[ri]??=[])[ci]=val;}
+    sheets.push({name,grid});
+  }
+  return sheets;
+}
+/* deteksi format: lembar "Data" (ekspor aplikasi) atau template ICRA (kolom 5-4-3-2-1) */
+const cellStr=v=>v===undefined||v===null?'':String(v).replace(/\s+/g,' ').trim();
+const cellNum=v=>{if(typeof v==='number')return v;const s=cellStr(v);return /^\d+(\.\d+)?$/.test(s)?+s:null};
+const weightOf=v=>{const n=cellNum(v);if(n!==null)return n;const m=/\(\s*([1-5])\s*\)\s*$/.exec(cellStr(v));return m?+m[1]:null};
+function parseFlat(sh){
+  const g=sh.grid;const hr=(g[0]||[]).map(x=>norm(x));if(!hr.includes('id')||!hr.includes('potensi risiko'))return null;
+  const ix=n=>hr.indexOf(n);const out=[];let skipped=0;
+  const sc=v=>{const n=cellNum(v);if(n!==null)return n;const m=/^\s*([1-5])\b/.exec(cellStr(v));return m?+m[1]:null};
+  for(let r=1;r<g.length;r++){const row=g[r];if(!row)continue;const m=cellStr(row[ix('potensi risiko')]);if(!m)continue;
+    const L=sc(row[ix('likelihood')]),I=sc(row[ix('impact')]),S=sc(row[ix('current system')]);if(!(L>=1&&L<=5&&I>=1&&I<=5&&S>=1&&S<=5)){skipped++;continue}
+    const gv=k=>ix(k)>=0?cellStr(row[ix(k)]):'';const who=gv('diisi oleh');
+    out.push({id:gv('id')||null,tahun:cellNum(row[ix('tahun')])||DB.S.year,unit:gv('unit')||'Rumah Sakit',grup:gv('grup risiko'),subgrup:gv('sub grup'),masalah:m,L,I,S,
+      status:STATUS.includes(gv('status'))?gv('status'):'Belum',tujuan:gv('tujuan'),indikator:gv('indikator'),rencana:gv('rencana tindak lanjut'),pic:gv('pic'),target:gv('target waktu'),bukti:gv('bukti evaluasi'),ket:[gv('keterangan'),who?'Diisi oleh: '+who:''].filter(Boolean).join(' · ')});}
+  return {kind:'flat',records:out,skipped,tahun:'',unit:''};
+}
+function parseTemplate(sh){
+  const g=sh.grid;
+  for(let w=0;w<Math.min(g.length,40);w++){const row=g[w]||[];const runs=[];
+    for(let c=0;c<row.length;c++){if([5,4,3,2,1].every((v,i)=>weightOf(row[c+i])===v)){runs.push(c);c+=4}}
+    if(runs.length<3)continue;
+    const blocks=runs.slice(0,3);const first=blocks[0];
+    const hdr=c=>{let s='';for(let k=1;k<=4&&w-k>=0;k++)for(let j=0;j<5;j++)s+=' '+cellStr((g[w-k]||[])[c+j]);return s.toLowerCase()};
+    const kinds=blocks.map(c=>{const h=hdr(c);return /current|kesiapan|preparedness|sistem|system/.test(h)?'S':/impact|dampak|consequen/.test(h)?'I':/likel|probab|kemungkinan|frekuensi/.test(h)?'L':null});
+    ['L','I','S'].forEach(k=>{if(!kinds.includes(k)){const i=kinds.indexOf(null);if(i>=0)kinds[i]=k}});
+    const blk={};blocks.forEach((c,i)=>blk[kinds[i]]=c);
+    // kolom teks
+    const th=c=>{let s='';for(let k=0;k<=4&&w-k>=0;k++)s+=' '+cellStr((g[w-k]||[])[c]);return s.toLowerCase()};
+    let mCol=-1,gCol=-1,sCol=-1;
+    for(let c=0;c<first;c++){const h=th(c);if(mCol<0&&/potens|potential|masalah|event|problem|kondisi/.test(h))mCol=c;else if(/sub/.test(h)&&sCol<0)sCol=c;else if(gCol<0&&/grup|group|kategori/.test(h))gCol=c}
+    if(mCol<0){let best=-1,bc=0;for(let c=0;c<first;c++){let n=0;for(let r=w+1;r<g.length;r++)if(typeof (g[r]||[])[c]==='string'&&cellStr(g[r][c]).length>3)n++;if(n>bc){bc=n;best=c}}mCol=best}
+    if(mCol<0)return null;
+    // tahun & unit default
+    let title='';for(let r=0;r<w;r++)(g[r]||[]).forEach(v=>{if(typeof v==='string')title+=' '+v});
+    const ym=/\b(20\d\d)\b/.exec(title)||/\b(20\d\d)\b/.exec(sh.name);const ys=/\b(\d{2})\s*$/.exec(sh.name.trim());
+    const tahun=ym?+ym[1]:ys?2000+ +ys[1]:DB.S.year;
+    let unit=sh.name.replace(/icra/ig,'').replace(/\b20\d\d\b|\b\d{2}\s*$/g,'').replace(/\s+/g,' ').trim();
+    if(!unit||/^all/i.test(unit))unit='Seluruh Departemen';
+    if(unit===unit.toUpperCase()&&unit.length>4)unit=unit.toLowerCase().replace(/\b\w/g,ch=>ch.toUpperCase());
+    const out=[];let skipped=0,cg='',cs='';
+    for(let r=w+1;r<g.length;r++){const row=g[r]||[];const m=cellStr(row[mCol]);
+      if(gCol>=0&&cellStr(row[gCol]))cg=cellStr(row[gCol]).replace(/[;:]\s*$/,'');
+      if(sCol>=0&&cellStr(row[sCol]))cs=cellStr(row[sCol]);
+      if(!m)continue;
+      if(/^(yang membuat|mengetahui|menyetujui|disetujui|disiapkan|nama\s*:|kesimpulan|note|keterangan|catatan)/i.test(m))continue;
+      const val=k=>{const c0=blk[k];for(let j=0;j<5;j++){const v=row[c0+j];if(v!==undefined&&v!==null&&cellStr(v)!==''&&v!==false)return 5-j}return null};
+      const L=val('L'),I=val('I'),S=val('S');
+      if(!L&&!I&&!S){if(gCol<0){cg=m.replace(/^([a-z]|\d+)[.)]\s*/i,'').replace(/[:;]\s*$/,'');cs=''}else skipped++;continue}
+      if(!L||!I||!S){skipped++;continue}
+      out.push({tahun,unit,grup:cg,subgrup:sCol>=0?cs:'',masalah:m,L,I,S});
+    }
+    return {kind:'template',records:out,skipped,tahun,unit};
+  }
+  return null;
+}
+$('#fileXlsx').onchange=async e=>{
+  const file=e.target.files[0];e.target.value='';if(!file)return;
+  let sheets;try{sheets=await readXlsx(await file.arrayBuffer())}catch(err){alert('Gagal membaca file: '+err.message);return}
+  const found=sheets.map(sh=>({name:sh.name,res:parseFlat(sh)||parseTemplate(sh)})).filter(x=>x.res&&x.res.records.length);
+  if(!found.length){alert('Tidak ditemukan lembar berformat ICRA (baris bobot 5-4-3-2-1 untuk Likelihood, Impact, Current System) atau lembar "Data" hasil ekspor aplikasi ini.');return}
+  showImportModal(file.name,found);
+};
+function showImportModal(fname,found){
+  const anyFlat=found.some(f=>f.res.kind==='flat');
+  $('#modal').innerHTML=`<h2>Impor dari Excel</h2><p class="muted" style="margin-top:0">${esc(fname)} · pilih lembar yang akan diimpor. Tahun & unit dapat disesuaikan.</p>
+   <div class="table-wrap" style="max-height:52vh"><table class="dt"><thead><tr><th class="nosort"></th><th class="nosort">Lembar</th><th class="nosort num">Risiko terbaca</th><th class="nosort">Tahun</th><th class="nosort">Unit / Area</th><th class="nosort">Contoh</th></tr></thead><tbody>
+   ${found.map((f,i)=>`<tr><td><input type="checkbox" data-i="${i}" ${(anyFlat?f.res.kind==='flat':/all dep|shtb|\b(20)?2\d\b/i.test(f.name))?'checked':''}></td><td><b>${esc(f.name)}</b><div class="small muted">${f.res.kind==='flat'?'Format Data aplikasi (tahun & unit dari file)':'Format template ICRA'}${f.res.skipped?` · ${f.res.skipped} baris belum lengkap dilewati`:''}</div></td><td class="num">${f.res.records.length}</td>
+   <td>${f.res.kind==='flat'?'—':`<input type="number" data-t="${i}" value="${f.res.tahun}" style="width:84px">`}</td><td>${f.res.kind==='flat'?'—':`<input type="text" data-u="${i}" value="${esc(f.res.unit)}" list="dlUnits2">`}</td><td class="small">${esc(trunc(f.res.records[0].masalah,50))}</td></tr>`).join('')}
+   </tbody></table></div>
+   <datalist id="dlUnits2">${units().map(u=>`<option value="${esc(u)}">`).join('')}</datalist>
+   <p class="small muted">Jika masalah yang sama (tahun + unit + teks masalah sama) sudah ada, nilainya akan <b>diperbarui</b>; selain itu ditambahkan sebagai data baru.</p>
+   <div class="row" style="justify-content:flex-end"><button class="btn" id="mCancel">Batal</button><button class="btn primary" id="mOk">Impor data terpilih</button></div>`;
+  $('#modalBg').style.display='flex';
+  $('#mCancel').onclick=()=>$('#modalBg').style.display='none';
+  $('#mOk').onclick=async()=>{
+    const sel=$$('#modal input[type=checkbox]:checked').map(c=>+c.dataset.i);if(!sel.length){toast('Pilih minimal satu lembar');return}
+    const byId=new Map(DB.records.map(r=>[r.id,r]));const K=r=>r.tahun+'|'+norm(r.unit)+'|'+norm(r.masalah);const byKey=new Map(DB.records.map(r=>[K(r),r]));
+    let seq=maxSeq(),add=0,upd=0;const now=new Date().toISOString();const out=[];
+    for(const i of sel){const f=found[i];const t=f.res.kind==='flat'?null:+$(`#modal [data-t="${i}"]`).value;const u=f.res.kind==='flat'?null:$(`#modal [data-u="${i}"]`).value.trim();
+      for(const r0 of f.res.records){const r={...r0};if(t)r.tahun=t;if(u)r.unit=u;
+        const ex=(r.id&&byId.get(r.id))||byKey.get(K(r));
+        if(ex){const m={...ex,...Object.fromEntries(Object.entries(r).filter(([k,v])=>v!==''&&v!==null&&k!=='id'))};out.push(m);byKey.set(K(m),m);upd++}
+        else{const n={status:'Belum',tujuan:'',indikator:'',rencana:'',pic:'',target:'',bukti:'',ket:'Impor dari '+fname,...r,id:r.id||uid(),seq:++seq,createdAt:now};out.push(n);byKey.set(K(n),n);if(n.id)byId.set(n.id,n);add++}}}
+    out.forEach(r=>r.updatedAt=now);
+    await DB.saveMany(out);$('#modalBg').style.display='none';toast(`Impor selesai: ${add} data baru, ${upd} diperbarui`,4000);render();
+  };
+}
+
+/* ===================== BERBAGI ===================== */
+function buildCopy(config){
+  const A='/*__'+'CONFIG__*/',B='/*__'+'CONFIG_END__*/';
+  const i=SOURCE_HTML.indexOf(A),j=SOURCE_HTML.indexOf(B,i);
+  return SOURCE_HTML.slice(0,i+A.length)+JSON.stringify(config).replace(/<\//g,'<\\/')+SOURCE_HTML.slice(j);
+}
+function deliverHtml(html,base,asZip){
+  if(asZip) download(zipStore([{name:base+'.html',data:html}],'application/zip'),base+'.zip');
+  else download(new Blob([html],{type:'text/html'}),base+'.html');
+}
+const stamp=()=>new Date().toISOString().slice(0,10);
+async function mergeIncoming(recs,source){
+  const K=r=>r.tahun+'|'+norm(r.unit)+'|'+norm(r.masalah);
+  const byId=new Map(DB.records.map(r=>[r.id,r]));const byKey=new Map(DB.records.map(r=>[K(r),r]));
+  let seq=maxSeq(),add=0,upd=0,skip=0,unch=0;const out=[];const now=new Date().toISOString();
+  for(const r0 of recs){
+    const ok=r0&&r0.masalah&&r0.unit&&[r0.L,r0.I,r0.S].every(v=>+v>=1&&+v<=5);if(!ok){skip++;continue}
+    const r={...r0,tahun:+r0.tahun||DB.S.year,L:+r0.L,I:+r0.I,S:+r0.S};if(source)r.source=source;
+    const ex=(r.id&&byId.get(r.id))||byKey.get(K(r));
+    if(ex){const rc=Object.fromEntries(Object.entries(r).filter(([k,v])=>v!==''&&v!==null&&v!==undefined));if(!r0.status)delete rc.status;
+      const same=['tahun','unit','grup','subgrup','masalah','L','I','S','tujuan','indikator','rencana','pic','target','bukti','ket'].every(k=>rc[k]===undefined||String(rc[k])===String(ex[k]??''))&&(!source||ex.source===source);
+      if(same){unch++;continue}
+      const m={...ex,...rc,id:ex.id,seq:ex.seq,updatedAt:r.updatedAt||now};out.push(m);byId.set(m.id,m);byKey.set(K(m),m);upd++}
+    else{const n={status:'Belum',tujuan:'',indikator:'',rencana:'',pic:'',target:'',bukti:'',ket:'',...r,id:r.id||uid(),seq:++seq,createdAt:r.createdAt||now,updatedAt:r.updatedAt||now};out.push(n);byId.set(n.id,n);byKey.set(K(n),n);add++}
+  }
+  if(out.length) await DB.saveMany(out);
+  return {add,upd,skip,unch};
+}
+/* ---------- Excel bersama (OneDrive) – format ICRA ALL DEP ---------- */
+const FSA='showOpenFilePicker' in window;
+function templateItems(tahun,unit){
+  const base=(SEED&&SEED.master?SEED.master.items:[]).map(i=>({...i}));
+  const have=new Set(base.map(i=>norm(i.masalah)));
+  DB.records.filter(r=>r.unit===unit).sort((a,b)=>(a.seq||0)-(b.seq||0)).forEach(r=>{if(!have.has(norm(r.masalah))){have.add(norm(r.masalah));base.push({grup:r.grup,subgrup:r.subgrup,masalah:r.masalah})}});
+  // kelompokkan per grup, urutan kemunculan
+  const order=[],by={};base.forEach(i=>{const g=i.grup||'(Tanpa grup)';if(!by[g]){by[g]=[];order.push(g)}by[g].push(i)});
+  return order.map(g=>[g,by[g]]);
+}
+function exportTemplate(tahun,unit,withData){
+  const S=DB.S;const yy=String(tahun).slice(-2);
+  const sh=new XSheet(unit==='Seluruh Departemen'?`ICRA ALL DEP ${yy}`:`ICRA ${unit} ${yy}`.slice(0,31));
+  const LC=4,IC=9,OC=14,PC=15,SCc=16,VC=21,WC=22;
+  sh.set(2,0,`Infection Control Risk Assessment\n${S.hospital} ${unit==='Seluruh Departemen'?'':'· '+unit+' '}Tahun ${tahun}`,X.title);for(let c=1;c<=WC;c++)sh.set(2,c,'',X.title);sh.merge(2,0,2,WC);sh.heights[2]=54;
+  const h0=3;
+  [['NO',0],['GRUP RISIKO (Kategori)',1],['SUB GRUP (sub Kategori)',2],['POTENSIAL RISK / MASALAH',3],['Score',VC],['Prioritas',WC]].forEach(([tx,c])=>{sh.set(h0,c,tx,X.head);sh.set(h0+1,c,'',X.head);sh.set(h0+2,c,'',X.head);sh.merge(h0,c,h0+2,c)});
+  sh.set(h0,OC,'score',X.head);sh.set(h0,PC,'kategori ',X.head);sh.set(h0+1,OC,'L × I',X.head);sh.set(h0+1,PC,'(skor ICRA)',X.head);sh.set(h0+2,OC,'',X.head);sh.set(h0+2,PC,'',X.head);
+  const IMP={5:'Catastropic loss (life / limb / function / financial / legal)',4:'Serious loss (function / financial / legal)',3:'Prolonged length of stay',2:'Moderate clinical/ financial',1:'Minimal clinical / financial'};
+  [['Likelihood / Probability',LC,'L'],['Consequences / Impact',IC,'I'],['Current Systems ',SCc,'S']].forEach(([tx,c,k])=>{
+    sh.set(h0,c,tx,X.head);for(let i=1;i<5;i++)sh.set(h0,c+i,'',X.head);sh.merge(h0,c,h0,c+4);
+    [5,4,3,2,1].forEach((v,i)=>{sh.set(h0+1,c+i,k==='I'?IMP[v]:SC[k].lbl[v],X.head);sh.set(h0+2,c+i,v,X.head)})});
+  sh.heights[h0]=53;sh.heights[h0+1]=67;sh.freeze=h0+3;
+  [5,30,22,56].forEach((w,c)=>sh.width(c,w));for(let c=4;c<=20;c++)sh.width(c,c>=IC&&c<=IC+4?9:6.5);sh.width(OC,7);sh.width(PC,13);sh.width(VC,9);sh.width(WC,9);
+  const recMap=new Map(DB.records.filter(r=>+r.tahun===+tahun&&r.unit===unit).map(r=>[norm(r.masalah),r]));
+  const groups=templateItems(tahun,unit);const first=h0+3;let row=first,no=0;
+  const lastRow=first+groups.reduce((a,[,l])=>a+l.length,0)-1;const LR=lastRow+1;
+  for(const [g,list] of groups){const start=row;no++;
+    for(const it of list){const R=row+1;const rec=withData?recMap.get(norm(it.masalah)):null;
+      sh.set(row,0,row===start?no:'',X.num);sh.set(row,1,row===start?g:'',X.text);sh.set(row,2,it.subgrup,X.text);sh.set(row,3,it.masalah,X.text);
+      for(let i=0;i<5;i++){const v=5-i;sh.set(row,LC+i,rec&&rec.L===v?v:'',X.num);sh.set(row,IC+i,rec&&rec.I===v?v:'',X.num);sh.set(row,SCc+i,rec&&rec.S===v?v:'',X.num)}
+      const c=rec?calc(rec):null;
+      sh.set(row,OC,c?c.li:0,X.num,`SUM(E${R}:I${R})*SUM(J${R}:N${R})`);
+      sh.set(row,PC,c?c.level:'',X.num,`IF(V${R}=0,"",IF(V${R}>=15,"Significant",IF(V${R}>=10,"High",IF(V${R}>=5,"Moderate","Low"))))`);
+      sh.set(row,VC,c?c.score:0,X.numBold,`SUM(E${R}:I${R})*SUM(J${R}:N${R})*SUM(Q${R}:U${R})`);
+      sh.set(row,WC,'',X.numBold,`IF(V${R}=0,"",SUMPRODUCT((V$${first+1}:V$${LR}>V${R})/COUNTIF(V$${first+1}:V$${LR},V$${first+1}:V$${LR}))+1)`);
+      row++;}
+    if(row-1>start){sh.merge(start,0,row-1,0);sh.merge(start,1,row-1,1)}
+  }
+  const F=first+1;
+  // dropdown per kolom (hanya nilai bobot kolom tsb)
+  for(let c=LC;c<=SCc+4;c++){if(c===OC||c===PC)continue;const v=c<IC?5-(c-LC):c<OC?5-(c-IC):5-(c-SCc);
+    sh.validations.push({sqref:`${colL(c)}${F}:${colL(c)}${LR}`,f:`"${v}"`,strict:1,title:'Isi satu kolom saja',prompt:'Pilih angka pada SATU kolom di setiap kelompok (Likelihood, Impact, Current System).'})}
+  // pewarnaan otomatis
+  sh.cf.push({sqref:`P${F}:P${LR}`,f:`$V${F}>=15`,dxf:0},{sqref:`P${F}:P${LR}`,f:`AND($V${F}>=10,$V${F}<15)`,dxf:1},{sqref:`P${F}:P${LR}`,f:`AND($V${F}>=5,$V${F}<10)`,dxf:2},{sqref:`P${F}:P${LR}`,f:`AND($V${F}>=1,$V${F}<5)`,dxf:3});
+  sh.cf.push({sqref:`V${F}:W${LR}`,f:`AND($W${F}<>"",$W${F}<=3)`,dxf:0});
+  // keterangan di samping
+  sh.width(24,4);sh.width(25,70);
+  ['Cara mengisi:','1. Pada setiap baris, pilih angka di SATU kolom Likelihood, SATU kolom Impact dan SATU kolom Current Systems (klik sel → panah dropdown).','2. Score, kategori dan Prioritas terhitung otomatis. Merah pada Score/Prioritas = 3 prioritas utama.','3. Potensial risiko baru boleh ditambahkan di baris kosong paling bawah tabel (isi Grup, Sub grup, Masalah).','4. Jangan mengubah judul kolom, urutan kolom, atau nama lembar.','Kategori (skor ICRA): Significant ≥15 · High 10–14 · Moderate 5–9 · Low 1–4']
+    .forEach((s,i)=>sh.set(first+i,25,s,i===0?X.bold:X.def));
+  // baris kosong tambahan untuk masalah baru
+  for(let k=0;k<15;k++){const r=row+k,R=r+1;[0,1,2,3].forEach(c=>sh.set(r,c,'',X.text));for(let c=LC;c<=SCc+4;c++)if(c!==OC&&c!==PC)sh.set(r,c,'',X.num);
+    sh.set(r,OC,0,X.num,`SUM(E${R}:I${R})*SUM(J${R}:N${R})`);sh.set(r,PC,'',X.num,`IF(V${R}=0,"",IF(V${R}>=15,"Significant",IF(V${R}>=10,"High",IF(V${R}>=5,"Moderate","Low"))))`);sh.set(r,VC,0,X.numBold,`SUM(E${R}:I${R})*SUM(J${R}:N${R})*SUM(Q${R}:U${R})`);sh.set(r,WC,'',X.numBold)}
+  let r=row+17;
+  sh.set(r,1,'Yang Membuat',X.center);sh.set(r,11,'Mengetahui',X.center);r+=5;
+  sh.set(r,1,'Nama: '+S.maker,X.center);sh.set(r,4,S.chair,X.center);sh.merge(r,4,r,10);sh.set(r,13,S.director,X.center);sh.merge(r,13,r,20);r++;
+  sh.set(r,1,S.makerRole,X.center);sh.set(r,4,S.chairRole,X.center);sh.merge(r,4,r,10);sh.set(r,13,S.directorRole+' '+S.hospital,X.center);sh.merge(r,13,r,20);
+  // lembar penetapan risiko
+  const pg=new XSheet('Penetapan risiko');pg.width(0,14);pg.width(1,34);pg.width(2,80);let q=0;
+  [['L','Penilaian Probabilitas / Frekuensi (Likelihood)','Frekuensi Kejadian'],['I','Penilaian Dampak Klinis / Konsekuensi (Consequences)','Dampak'],['S','Sistem Yang Ada (Current System)','Kegiatan']].forEach(([k,tt,h3])=>{
+    pg.set(q,0,tt,X.bold);q++;pg.set(q,0,'Tingkat Risiko',X.headDark);pg.set(q,1,'Deskripsi',X.headDark);pg.set(q,2,h3,X.headDark);q++;
+    [1,2,3,4,5].forEach(v=>{pg.set(q,0,v,X.num);pg.set(q,1,k==='I'?IMP[v]:SC[k].lbl[v],X.text);pg.set(q,2,SC[k].desc[v],X.text);q++});q++});
+  pg.set(q,0,'SKOR RISIKO = (LIKELIHOOD PROBABILITY) X (CONSEQUENCES IMPACT) X (CURRENT SYSTEM)',X.bold);q+=2;
+  LEVELS.forEach(l=>{pg.set(q,0,`${l.k} (${l.range})`,X[l.k]);pg.merge(q,0,q,1);pg.set(q,1,'',X[l.k]);pg.set(q,2,l.act,X.text);q++});
+  download(buildXlsx([sh,pg]),`ICRA_${unit==='Seluruh Departemen'?'ALL_DEP':unit}_${tahun}_OneDrive.xlsx`.replace(/[^\w.\-]+/g,'_'));toast('Template Excel diunduh');
+}
+/* deteksi lembar yang bisa dibaca dari workbook */
+function detectSheets(sheets){
+  return sheets.map(sh=>{const f=parseFlat(sh);if(f)return {name:sh.name,kind:'flat',res:f};const tp=parseTemplate(sh);return tp?{name:sh.name,kind:'template',res:tp}:null}).filter(Boolean);
+}
+function chooseSheets(fileName,found,saved){
+  return new Promise(resolve=>{
+    const sv=new Map((saved||[]).map(s=>[s.name,s]));const anySaved=sv.size>0;
+    const defChk=f=>anySaved?sv.has(f.name):(f.kind==='flat'||/all dep/i.test(f.name)&&f.res.tahun===Math.max(...found.filter(x=>/all dep/i.test(x.name)).map(x=>x.res.tahun)));
+    $('#modal').innerHTML=`<h2>Pilih lembar Excel yang disinkronkan</h2><p class="muted" style="margin-top:0">${esc(fileName)} · centang lembar yang diisi departemen. Pilihan ini disimpan dan dipakai setiap kali sinkron.</p>
+     <div class="table-wrap" style="max-height:55vh"><table class="dt"><thead><tr><th class="nosort"></th><th class="nosort">Lembar</th><th class="nosort num">Baris terisi</th><th class="nosort num">Belum diisi</th><th class="nosort">Tahun</th><th class="nosort">Unit / Area</th></tr></thead><tbody>
+     ${found.map((f,i)=>{const s=sv.get(f.name);return `<tr><td><input type="checkbox" data-i="${i}" ${defChk(f)?'checked':''}></td><td><b>${esc(f.name)}</b><div class="small muted">${f.kind==='flat'?'Format tabel (Data)':'Format ICRA (kolom 5-4-3-2-1)'}</div></td><td class="num">${f.res.records.length}</td><td class="num">${f.res.skipped||0}</td>
+      <td>${f.kind==='flat'?'—':`<input type="number" data-t="${i}" value="${s?s.tahun:f.res.tahun}" style="width:84px">`}</td><td>${f.kind==='flat'?'—':`<input type="text" data-u="${i}" value="${esc(s?s.unit:f.res.unit)}" list="dlUnits3">`}</td></tr>`}).join('')}
+     </tbody></table></div><datalist id="dlUnits3">${uniq([...units(),...DEFAULT_UNITS]).map(u=>`<option value="${esc(u)}">`).join('')}</datalist>
+     <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" id="csCancel">Batal</button><button class="btn primary" id="csOk">Simpan pilihan &amp; sinkron</button></div>`;
+    $('#modalBg').style.display='flex';
+    $('#csCancel').onclick=()=>{$('#modalBg').style.display='none';resolve(null)};
+    $('#csOk').onclick=()=>{const sel=$$('#modal input[type=checkbox]:checked').map(c=>+c.dataset.i);if(!sel.length){toast('Pilih minimal satu lembar');return}
+      const cfg=sel.map(i=>{const f=found[i];return f.kind==='flat'?{name:f.name,kind:'flat'}:{name:f.name,kind:'template',tahun:+$(`#modal [data-t="${i}"]`).value,unit:$(`#modal [data-u="${i}"]`).value.trim()||f.res.unit}});
+      $('#modalBg').style.display='none';resolve(cfg)};
+  });
+}
+async function readHandle(h,interactive){
+  let perm=await h.queryPermission({mode:'read'});
+  if(perm!=='granted'&&interactive)perm=await h.requestPermission({mode:'read'});
+  if(perm!=='granted')return null;
+  const file=await h.getFile();return {file,sheets:await readXlsx(await file.arrayBuffer())};
+}
+async function connectExcel(){
+  try{const [h]=await window.showOpenFilePicker({types:[{description:'File Excel',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx','.xlsm']}}]});
+    const rd=await readHandle(h,true);if(!rd)return;
+    const found=detectSheets(rd.sheets);if(!found.length){alert('Tidak ada lembar format ICRA (baris 5-4-3-2-1) di file ini.');return}
+    const cfg=await chooseSheets(h.name,found,null);if(!cfg)return;
+    await DB.setSetting('excelHandle',h);await DB.setSetting('excelName',h.name);await DB.setSetting('excelSheets',cfg);await syncExcel(true);}
+  catch(err){if(err.name!=='AbortError')alert('Gagal menghubungkan file: '+err.message)}
+}
+async function changeSheets(){
+  const h=DB.settings.excelHandle;if(!h)return;
+  try{const rd=await readHandle(h,true);if(!rd)return;const cfg=await chooseSheets(h.name,detectSheets(rd.sheets),DB.settings.excelSheets);if(!cfg)return;await DB.setSetting('excelSheets',cfg);await syncExcel(true)}
+  catch(err){alert('Gagal membaca file: '+err.message)}
+}
+async function syncExcel(interactive){
+  const h=DB.settings.excelHandle;if(!h){toast('Belum ada file Excel yang terhubung');return false}
+  try{
+    const rd=await readHandle(h,interactive);if(!rd){if(interactive)toast('Izin membaca file belum diberikan');return false}
+    let cfg=DB.settings.excelSheets;
+    if(!cfg||!cfg.length){const found=detectSheets(rd.sheets);cfg=await chooseSheets(h.name,found,null);if(!cfg)return false;await DB.setSetting('excelSheets',cfg)}
+    let recs=[],skipped=0;const missing=[];const res={add:0,upd:0,skip:0,unch:0,del:0};const perSheet=[];
+    const prev=DB.settings.excelSync;const fileSame=prev&&prev.fileModified===rd.file.lastModified;
+    for(const c of cfg){const sh=rd.sheets.find(s=>s.name===c.name);if(!sh){missing.push(c.name);continue}
+      let part=[];
+      if(c.kind==='flat'){const f=parseFlat(sh);if(f){part=f.records;skipped+=f.skipped}}
+      else{const tp=parseTemplate(sh);if(tp){part=tp.records.map(r=>({...r,tahun:c.tahun,unit:c.unit}));skipped+=tp.skipped}}
+      perSheet.push({name:c.name,unit:c.unit||'',tahun:c.tahun||'',filled:part.length,units:uniq(part.map(r=>r.unit)).join(', ')});
+      recs.push(...part);const m=await mergeIncoming(part,'xl:'+c.name);['add','upd','skip','unch'].forEach(k=>res[k]+=m[k]);}
+    if(missing.length&&interactive)alert('Lembar berikut tidak ditemukan di file: '+missing.join(', ')+'\nData dari lembar itu tidak diubah. Gunakan "Pilih lembar" untuk memperbarui pilihan.');
+    // hapus data yang sudah tidak ada / dikosongkan di Excel (hanya data yang berasal dari sinkron lembar tsb)
+    const keyOf=r=>r.tahun+'|'+norm(r.unit)+'|'+norm(r.masalah);
+    const present=new Set(recs.map(keyOf)),presentIds=new Set(recs.filter(r=>r.id).map(r=>r.id));
+    const scopes=cfg.filter(c=>!missing.includes(c.name));
+    const toDel=DB.records.filter(r=>r.source&&scopes.some(c=>r.source==='xl:'+c.name&&(c.kind==='flat'||(+r.tahun===+c.tahun&&r.unit===c.unit)))&&!present.has(keyOf(r))&&!presentIds.has(r.id));
+    let pendingDel=0;
+    if(toDel.length){
+      const ok=interactive&&confirm(`${toDel.length} data sudah dihapus atau dikosongkan di Excel:\n\n${toDel.slice(0,10).map(r=>'• '+trunc(r.masalah,70)+' ('+r.unit+' '+r.tahun+')').join('\n')}${toDel.length>10?'\n• … dan '+(toDel.length-10)+' lainnya':''}\n\nHapus juga dari dashboard? (Bisa dikembalikan lewat tombol "Kembalikan")`);
+      if(ok){await DB.del(toDel.map(r=>r.id));await DB.setSetting('syncTrash',{at:new Date().toISOString(),records:toDel});res.del=toDel.length}else pendingDel=toDel.length;
+    }
+    const info={perSheet,fileSame,at:new Date().toISOString(),fileModified:rd.file.lastModified,rows:recs.length,skipped,pendingDel,sheets:cfg.map(c=>c.name),...res};
+    await DB.setSetting('excelSync',info);
+    if(res.add||res.upd||res.del){const log=DB.settings.mergeLog||[];log.push({at:info.at,file:'Sinkron: '+h.name+(res.del?` (${res.del} dihapus)`:''),units:uniq(recs.map(r=>r.unit)).join(', '),add:res.add,upd:res.upd});await DB.setSetting('mergeLog',log.slice(-50))}
+    // arahkan filter dashboard ke tahun/unit hasil sinkron agar data langsung terlihat
+    if(res.add||res.upd){const c0=cfg.find(c=>c.kind==='template'&&!missing.includes(c.name));if(c0){UI.dash.tahun=String(c0.tahun);UI.dash.unit=c0.unit}}
+    if(interactive&&fileSame&&!res.add&&!res.upd&&!res.del){
+      alert(`Tidak ada perubahan yang terbaca.\n\nFile "${h.name}" di komputer ini terakhir berubah pada ${new Date(rd.file.lastModified).toLocaleString('id-ID')}, sama seperti saat sinkron sebelumnya.\n\nKemungkinan penyebab:\n1. OneDrive di komputer ini belum mengunduh perubahan dari departemen. Cek ikon awan OneDrive di taskbar (harus centang hijau / "Up to date"), tunggu 1–2 menit, lalu sinkron lagi.\n2. File yang dihubungkan bukan file OneDrive yang dibagikan (misalnya salinan di folder Downloads/Desktop). Klik "Ganti file Excel" lalu pilih file dari folder OneDrive.\n3. Departemen mengisi salinan lain (mengunduh lalu mengedit di komputernya sendiri), bukan lewat link bersama.`);
+    }
+    toast(`Sinkron Excel selesai: ${res.add} baru, ${res.upd} diperbarui, ${res.del} dihapus, ${res.unch} tetap${pendingDel?` · ${pendingDel} menunggu konfirmasi hapus`:''}`,5000);render();return true;
+  }catch(err){if(interactive)alert('Sinkron gagal: '+err.message+(err.name==='NotFoundError'?'\n\nFile tidak ditemukan. Pastikan OneDrive tersinkron atau hubungkan ulang file Excel.':''));return false}
+}
+function excelSyncCard(){
+  const n=DB.settings.excelName,s=DB.settings.excelSync,cfg=DB.settings.excelSheets||[];const y=(years()[0]||DB.S.year);
+  return `<div class="card" style="grid-column:1/-1;border-top:4px solid #2a78d6"><h3>⭐ Sinkron dengan Excel bersama (OneDrive RS)</h3><p class="sub">Format Excel sama dengan lembar <b>ICRA ALL DEP</b>: kolom Likelihood 5–1, Impact 5–1, score, kategori, Current Systems, Score &amp; Prioritas. Departemen cukup mengisi Excel di OneDrive RS, lalu dashboard membacanya dari folder OneDrive di komputer Anda.</p>
+   <div class="grid g2" style="align-items:start">
+    <div><ol class="steps">
+     <li>Unduh <b>template Excel ICRA</b> (atau pakai file ICRA Anda sendiri, misalnya <i>ICRA_SHTB_tahun_2027.xlsx</i>). Unggah ke OneDrive RS lalu bagikan link-nya ke departemen dengan izin <b>dapat mengedit</b>.</li>
+     <li>Departemen mengisi angka pada <b>satu kolom</b> Likelihood, Impact &amp; Current Systems di baris areanya. Score, kategori &amp; Prioritas terhitung otomatis di Excel.</li>
+     <li>Di komputer Anda, pastikan aplikasi <b>OneDrive</b> menyinkronkan file itu. Klik kanan file → <i>Always keep on this device</i>.</li>
+     <li>Klik <b>Hubungkan file Excel</b>, pilih file dari folder OneDrive, lalu centang lembar yang dipakai (misalnya <i>ICRA ALL DEP 27</i>).</li>
+     <li>Setiap ingin memperbarui dashboard, klik <b>🔄 Sinkron sekarang</b> (juga ada di halaman Dashboard).</li></ol></div>
+    <div>
+     <div class="row" style="margin-bottom:8px"><label class="f">Tahun template<input type="number" id="tplYear" value="${y}" style="width:90px"></label><label class="f">Unit / lembar<select id="tplUnit">${filterOpts('Seluruh Departemen',uniq(['Seluruh Departemen',...units()]))}</select></label></div>
+     <div class="row" style="margin-bottom:12px"><button class="btn" id="tplEmpty">⬇ Template Excel ICRA (kosong)</button><button class="btn" id="tplData">⬇ Template + nilai yang sudah ada</button></div>
+     ${FSA?`<div class="row" style="margin-bottom:10px"><button class="btn primary" id="xlConnect">🔗 ${n?'Ganti file Excel':'Hubungkan file Excel'}</button>${n?`<button class="btn primary" id="xlSync">🔄 Sinkron sekarang</button><button class="btn" id="xlSheets">Pilih lembar</button>`:''}</div>
+     <div class="small ${n?'':'muted'}">${n?`Terhubung: <b>${esc(n)}</b> · lembar: ${cfg.map(c=>esc(c.name)+(c.kind==='template'?` (${esc(c.unit)} ${c.tahun})`:'')).join(', ')||'-'}<br>Sinkron terakhir: ${s?`${fmtDate(s.at)} ${new Date(s.at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})} · ${s.rows} baris terisi dibaca · ${s.add} baru, ${s.upd} diperbarui, ${s.del||0} dihapus · ${s.skipped} baris belum diisi<br>File Excel di komputer ini terakhir berubah: <b>${s.fileModified?new Date(s.fileModified).toLocaleString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'-'}</b>${s.perSheet?'<br>'+s.perSheet.map(x=>`Lembar <b>${esc(x.name)}</b> → ${esc(x.unit)} ${x.tahun}: <b>${x.filled}</b> baris terisi`).join('<br>'):''}${s.pendingDel?` · <span style="color:#b42323">${s.pendingDel} data dihapus di Excel belum dikonfirmasi — klik Sinkron sekarang</span>`:''}`:'belum pernah'}`:'Belum ada file yang terhubung.'}</div>`
+     :`<div class="banner">Fitur hubungkan file butuh Google Chrome atau Microsoft Edge versi terbaru. Sementara ini, gunakan menu Data &amp; Excel → Impor dari Excel dan pilih file dari folder OneDrive.</div>`}
+     ${DB.settings.syncTrash&&DB.settings.syncTrash.records.length?`<div class="row" style="margin-top:10px"><button class="btn sm" id="xlUndo">↩ Kembalikan ${DB.settings.syncTrash.records.length} data yang terhapus pada ${fmtDate(DB.settings.syncTrash.at)}</button></div>`:''}
+     <p class="small muted" style="margin-top:10px"><b>Dashboard mengikuti Excel:</b> baris baru ditambahkan, nilai yang diubah diperbarui, dan baris yang dihapus atau dikosongkan di Excel ikut dihapus setelah Anda konfirmasi. Data yang diinput langsung lewat dashboard tidak ikut terhapus.</p>
+    </div></div></div>`;
+}
+function bindExcelSync(){
+  const yr=()=>+$('#tplYear').value||DB.S.year,un=()=>$('#tplUnit').value;
+  $('#tplEmpty')&&($('#tplEmpty').onclick=()=>exportTemplate(yr(),un(),false));
+  $('#tplData')&&($('#tplData').onclick=()=>exportTemplate(yr(),un(),true));
+  $('#xlConnect')&&($('#xlConnect').onclick=connectExcel);
+  $('#xlSync')&&($('#xlSync').onclick=()=>syncExcel(true));
+  $('#xlSheets')&&($('#xlSheets').onclick=changeSheets);
+  $('#xlUndo')&&($('#xlUndo').onclick=async()=>{const tr=DB.settings.syncTrash;if(!tr||!confirm(`Kembalikan ${tr.records.length} data ke dashboard? Data ini tidak akan dihapus lagi oleh sinkron berikutnya.`))return;
+    await DB.saveMany(tr.records.map(r=>{const x={...r};delete x.source;x.updatedAt=new Date().toISOString();return x}));await DB.setSetting('syncTrash',null);toast(tr.records.length+' data dikembalikan');render()});
+}
+function viewShare(el){
+  const ys=years(),us=units();const log=DB.settings.mergeLog||[];
+  el.innerHTML=`<div class="page-head"><div><h1>${srcExcel()?'Excel OneDrive &amp; Bagikan':'Bagikan &amp; Gabung Data'}</h1><p>${srcExcel()?'Hubungkan dan sinkronkan Excel ICRA di OneDrive, lalu bagikan laporan baca-saja ke departemen.':'Departemen lain bisa melihat dashboard dan ikut mengisi ICRA unitnya, tanpa internet dan tanpa mengubah data Anda secara langsung.'}</p></div></div>
+  <div class="card dash-only" style="margin-bottom:14px"><h3>Cara kerjanya</h3>
+   <ol class="steps"><li>Unduh <b>File Input Departemen</b> di bawah, lalu bagikan: unggah ke server/intranet RS (tim IT memberi link-nya) atau kirim lewat WA/email.</li>
+   <li>Departemen membuka file/link itu, mengisi ICRA unitnya, lalu menekan <b>Kirim Data ke PPI</b>. Hasilnya berupa file data kecil (.json) yang dikirim ke Anda lewat WA/email.</li>
+   <li>Anda menggabungkan file itu di bagian <b>Gabungkan data dari departemen</b>. Data langsung masuk ke dashboard utama ini.</li>
+   <li>Untuk berbagi hasil, unduh <b>Laporan Baca-saja</b> (grafik, matriks, tabel, unduh Excel) lalu bagikan dengan cara yang sama.</li></ol>
+   <p class="small muted" style="margin:8px 0 0">File utama ini (berisi seluruh data &amp; fitur gabung) sebaiknya tetap di komputer Anda, jangan diunggah ke server.</p></div>
+  <div class="grid g2" style="align-items:start">
+   ${excelSyncCard()}
+   <div class="card dash-only"><h3>1. File Input Departemen</h3><p class="sub">Formulir input + dashboard untuk departemen. Berisi daftar unit, grup risiko &amp; potensial risiko dari Excel Anda, tetapi <b>tidak berisi data RS</b>. Cukup dibuat sekali, kecuali daftar pilihan berubah.</p>
+    <div class="row"><button class="btn primary" id="shDeptHtml">⬇ Unduh file (.html), untuk server/intranet</button><button class="btn" id="shDeptZip">⬇ Unduh .zip, untuk WA/email</button></div></div>
+   <div class="card"><h3>Laporan Baca-saja</h3><p class="sub">Salinan dashboard berisi data per hari ini. Penerima bisa melihat grafik/tabel &amp; mengunduh Excel, tetapi tidak bisa mengubah data. Buat ulang setiap kali data diperbarui.</p>
+    <div class="row" style="margin-bottom:10px"><label class="f">Tahun<select id="shT">${filterOpts('',ys,'Semua tahun')}</select></label><label class="f">Unit<select id="shU">${filterOpts('',us,'Semua unit')}</select></label></div>
+    <div class="row"><button class="btn primary" id="shViewHtml">⬇ Unduh laporan (.html)</button><button class="btn" id="shViewZip">⬇ Unduh .zip, untuk WA/email</button></div></div>
+   <div class="card dash-only"><h3>3. Gabungkan data dari departemen</h3><p class="sub">Pilih satu atau beberapa file data dari departemen (.json, atau file Excel hasil unduhan dashboard). Data dengan masalah yang sama (tahun + unit + masalah) akan diperbarui, bukan digandakan.</p>
+    <div class="row"><button class="btn primary" id="shMerge">⬆ Pilih file data departemen</button></div>
+    <input type="file" id="fileMerge" accept=".json,.xlsx" multiple class="hidden">
+    ${log.length?`<div class="table-wrap" style="margin-top:12px;max-height:240px"><table class="dt"><thead><tr><th class="nosort">Tanggal</th><th class="nosort">File</th><th class="nosort">Unit</th><th class="nosort num">Baru</th><th class="nosort num">Diperbarui</th></tr></thead><tbody>${[...log].reverse().map(l=>`<tr><td class="small">${fmtDate(l.at)}</td><td class="small">${esc(l.file)}</td><td class="small">${esc(l.units)}</td><td class="num">${l.add}</td><td class="num">${l.upd}</td></tr>`).join('')}</tbody></table></div>`:''}</div>
+   <div class="card"><h3>Catatan untuk server / intranet RS</h3><ul class="steps">
+    <li>Minta tim IT menaruh file .html di server web internal (cukup sebagai file statis). Link-nya hanya bisa dibuka dari jaringan RS.</li>
+    <li>Setiap komputer departemen menyimpan isiannya di browser masing-masing, jadi tetap rutin kirim data ke PPI.</li>
+    <li>Saat dikirim lewat WA, kirim sebagai <b>Dokumen</b>. Kalau email RS memblokir file .html, gunakan versi .zip. Penerima cukup mengekstrak lalu membuka file .html di Chrome/Edge.</li>
+    <li>Jangan unggah laporan ke situs atau link yang terbuka untuk umum.</li></ul></div>
+  </div>`;
+  const dept=z=>deliverHtml(buildCopy({mode:'dept',createdAt:new Date().toISOString(),profile:DB.S}),'ICRA_Input_Departemen',z);
+  $('#shDeptHtml').onclick=()=>dept(false);$('#shDeptZip').onclick=()=>dept(true);
+  const view=z=>{const t=$('#shT').value,u=$('#shU').value;const recs=DB.records.filter(r=>(!t||+r.tahun===+t)&&(!u||r.unit===u));
+    if(!recs.length){toast('Tidak ada data untuk filter ini');return}
+    const scope=`${u||'Semua unit'} · ${t?'Tahun '+t:'Semua tahun'}`;
+    deliverHtml(buildCopy({mode:'view',createdAt:new Date().toISOString(),scope,profile:DB.S,data:recs}),`ICRA_Laporan_${(u||'Semua_unit')}_${t||'semua_tahun'}_${stamp()}`.replace(/[^\w\-]+/g,'_'),z)};
+  $('#shViewHtml').onclick=()=>view(false);$('#shViewZip').onclick=()=>view(true);
+  bindExcelSync();
+  $('#shMerge').onclick=()=>$('#fileMerge').click();
+  $('#fileMerge').onchange=async e=>{
+    const files=[...e.target.files];e.target.value='';if(!files.length)return;
+    const log=DB.settings.mergeLog||[];let msg=[];
+    for(const file of files){
+      try{let recs=[];
+        if(/\.json$/i.test(file.name)){const d=JSON.parse(await file.text());recs=Array.isArray(d)?d:(d.records||[]);}
+        else{const sh=(await readXlsx(await file.arrayBuffer())).map(parseFlat).find(x=>x&&x.records.length);if(!sh)throw new Error('lembar "Data" tidak ditemukan');recs=sh.records}
+        const unitsIn=uniq(recs.map(r=>r.unit)).join(', ');
+        if(!confirm(`${file.name}\n${recs.length} data · unit: ${unitsIn||'-'}\n\nGabungkan ke dashboard utama?`))continue;
+        const res=await mergeIncoming(recs);log.push({at:new Date().toISOString(),file:file.name,units:unitsIn,add:res.add,upd:res.upd});
+        msg.push(`${file.name}: ${res.add} baru, ${res.upd} diperbarui${res.skip?`, ${res.skip} dilewati`:''}`);
+      }catch(err){msg.push(`${file.name}: gagal (${err.message})`)}
+    }
+    await DB.setSetting('mergeLog',log.slice(-50));render();if(msg.length)alert('Hasil penggabungan:\n\n'+msg.join('\n'));
+  };
+}
+function viewSend(el){
+  const ys=years(),us=units();const last=DB.settings.lastSent;
+  el.innerHTML=`<div class="page-head"><div><h1>Kirim Data ke Komite PPI</h1><p>Data yang Anda isi tersimpan di komputer ini. Agar masuk ke dashboard PPI, unduh file data lalu kirim ke IPCN.</p></div></div>
+  ${backupBanner()}
+  <div class="grid g2" style="align-items:start">
+   <div class="card"><h3>Unduh file data</h3><p class="sub">Terakhir dikirim: ${last?fmtDate(last):'belum pernah'} · total ${DB.records.length} data di komputer ini</p>
+    <div class="row" style="margin-bottom:10px"><label class="f">Tahun<select id="sdT">${filterOpts(ys[0]??'',ys,'Semua tahun')}</select></label><label class="f">Unit<select id="sdU">${filterOpts('',us,'Semua unit')}</select></label></div>
+    <div id="sdInfo" class="small muted" style="margin-bottom:10px"></div>
+    <div class="row"><button class="btn primary" id="sdJson">📤 Unduh file data untuk PPI (.json)</button><button class="btn" id="sdXlsx">⬇ Excel (arsip unit)</button></div></div>
+   <div class="card"><h3>Langkah pengiriman</h3><ol class="steps">
+    <li>Pilih tahun &amp; unit, lalu klik <b>Unduh file data untuk PPI</b>.</li>
+    <li>Kirim file <b>.json</b> yang terunduh ke IPCN lewat WhatsApp (sebagai Dokumen) atau email.</li>
+    <li>IPCN menggabungkannya ke dashboard utama. Kalau ada perubahan, cukup kirim ulang. Data yang sama akan diperbarui, tidak digandakan.</li></ol></div>
+  </div>`;
+  const pick=()=>{const t=$('#sdT').value,u=$('#sdU').value;return DB.records.filter(r=>(!t||+r.tahun===+t)&&(!u||r.unit===u))};
+  const info=()=>{const l=pick();$('#sdInfo').textContent=`${l.length} data akan dikirim · unit: ${uniq(l.map(r=>r.unit)).join(', ')||'-'}`};
+  $('#sdT').onchange=info;$('#sdU').onchange=info;info();
+  $('#sdJson').onclick=async()=>{const l=pick();if(!l.length){toast('Belum ada data untuk dikirim');return}
+    const u=$('#sdU').value||uniq(l.map(r=>r.unit)).join('-');const t=$('#sdT').value||'semua';
+    download(new Blob([JSON.stringify({app:'ICRA-Dashboard',kind:'kiriman-departemen',exportedAt:new Date().toISOString(),units:uniq(l.map(r=>r.unit)),records:l},null,1)],{type:'application/json'}),`ICRA_Data_${u}_${t}_${stamp()}.json`.replace(/[^\w.\-]+/g,'_'));
+    await DB.setSetting('lastSent',new Date().toISOString());toast('File data diunduh. Kirim file ini ke IPCN.',4000);render()};
+  $('#sdXlsx').onclick=()=>exportXlsx(pick());
+}
+
+/* ===================== START ===================== */
+(async()=>{
+  document.body.classList.add('mode-'+MODE);
+  $$('.only-main').forEach(b=>b.classList.toggle('hidden',MODE!=='main'||SIMPLE));$$('.only-dept').forEach(b=>b.classList.toggle('hidden',MODE!=='dept'));
+  if(MODE==='view'){
+    $$('#nav button').forEach(b=>b.classList.toggle('hidden',!['dashboard','data','guide'].includes(b.dataset.view)));
+    $('#logoSub').textContent='Laporan baca-saja';$('#modeTag').innerHTML='<span class="mode-tag">BACA-SAJA</span>';
+    $('.side-foot div').innerHTML='<span class="dot"></span>Salinan laporan dari Komite PPI';
+    DB.records=(CONFIG.data||[]).map(r=>({...r}));DB.settings={};render();return;
+  }
+  if(MODE==='server'){await serverStart();return}
+  if(MODE==='dept'){$('#logoSub').textContent='Input Departemen';$('#modeTag').innerHTML='<span class="mode-tag">DEPARTEMEN</span>'}
+  try{await DB.open();await DB.load()}catch(err){$('#main').innerHTML=`<div class="card">Database tidak dapat dibuka: ${esc(err.message)}. Gunakan Google Chrome atau Microsoft Edge, dan jangan gunakan mode Incognito/InPrivate.</div>`;return}
+  if(MODE==='main'&&!DB.records.length&&!DB.settings.initialized){await DB.saveMany(seedRecords());await DB.setSetting('initialized',true)}
+  if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+  UI.input.tahun=DB.S.year;
+  if(MODE==='main'&&!SIMPLE&&DB.settings.excelHandle&&FSA){try{if(await DB.settings.excelHandle.queryPermission({mode:'read'})==='granted')syncExcel(false)}catch(e){}}
+  if(MODE==='dept'&&!DB.records.length)VIEW='input',$$('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view==='input'));
+  render();
+})();
+</script>
+</body>
+</html>
